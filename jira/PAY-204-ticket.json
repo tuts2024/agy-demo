@@ -1,0 +1,45 @@
+{
+  "key": "PAY-204",
+  "project": "PAY",
+  "project_name": "E-Commerce Checkout & Payments",
+  "issue_type": "Story",
+  "status": "In Progress",
+  "priority": "High",
+  "summary": "Implement Tiered Loyalty Discounts (VIP 20%) & Defensive Voucher Validation in Checkout Engine",
+  "reporter": {
+    "name": "Sarah Chen",
+    "email": "sarah.chen@company.com",
+    "role": "Principal Product Manager"
+  },
+  "assignee": {
+    "name": "Alex Rivera",
+    "email": "alex.rivera@company.com",
+    "role": "Senior Software Engineer"
+  },
+  "description": "As the Payments Platform team, we need to upgrade the loyalty tier discount structure so VIP Platinum members receive a 20% base discount (upgraded from 10%), while safeguarding the checkout engine with defensive voucher expiration checks and audit logging.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-1",
+      "title": "VIP Platinum 20% Discount Rate",
+      "requirement": "CustomerTier.VIP_PLATINUM discount multiplier must be updated to 0.20 (20%). A $100 cart for a VIP customer must calculate a $20.00 discount and an $80.00 final amount."
+    },
+    {
+      "id": "AC-2",
+      "title": "Defensive Voucher Validation & Cap Enforcement",
+      "requirement": "Vouchers must be verified for is_active == True. If a voucher exceeds max_discount_amount, the discount must be capped at max_discount_amount. Inactive or expired vouchers must not apply any discount."
+    },
+    {
+      "id": "AC-3",
+      "title": "Comprehensive Unit Test Suite",
+      "requirement": "Unit tests in tests/test_discount_service.py must be updated to validate the 20% VIP Platinum rate ($80 expected on $100), plus new test coverage for inactive voucher rejection and discount capping."
+    },
+    {
+      "id": "AC-4",
+      "title": "Structured Audit Logging",
+      "requirement": "Each successful discount calculation must emit a structured audit log containing audit_event_id, customer_id, subtotal, and total_discount for financial compliance."
+    }
+  ],
+  "labels": ["checkout", "loyalty-tier", "security-hardening", "q3-priority"],
+  "sprint": "Sprint 42 (Payments Modernization)",
+  "linked_pull_request": "PR #104 (gitrey/cloud-solutions-mmb)"
+}

@@ -1,0 +1,23 @@
+{
+  "number": 104,
+  "title": "feat(checkout): Support loyalty discounts and voucher redemption [PAY-204]",
+  "author": "alex-dev",
+  "state": "open",
+  "created_at": "2026-08-12T14:30:00Z",
+  "base": {
+    "ref": "main",
+    "sha": "a1b2c3d4e5"
+  },
+  "head": {
+    "ref": "feature/PAY-204-tiered-discounts",
+    "sha": "f6e5d4c3b2"
+  },
+  "body": "## Summary\nImplements customer loyalty tier discounts and voucher code integration for the checkout pipeline.\n\nCloses **PAY-204**.\n\n### Changes\n- Added `CustomerTier` enums and data models in `models.py`.\n- Implemented `DiscountService.calculate_discount` with tier rate mapping.\n- Added unit tests in `test_discount_service.py`.\n\nCC: @sarah-pm @alex-lead",
+  "changed_files": [
+    "src/models.py",
+    "src/discount_service.py",
+    "tests/test_discount_service.py"
+  ],
+  "additions": 94,
+  "deletions": 12
+}

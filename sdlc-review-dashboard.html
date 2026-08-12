@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomous SDLC Review & Remediation — Powered by Jetski Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0d14;
+      --bg-secondary: #101522;
+      --bg-card: rgba(22, 27, 34, 0.85);
+      --bg-card-hover: rgba(30, 38, 48, 0.95);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.3);
+      --text-primary: #f0f6fc;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      
+      --accent-gemini: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+      --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.25);
+      --shadow-glow-emerald: 0 0 25px rgba(16, 185, 129, 0.25);
+      --shadow-glow-rose: 0 0 25px rgba(244, 63, 94, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(79, 70, 229, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(236, 72, 153, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(16, 21, 34, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-badge {
+      background: var(--accent-gemini);
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 10px rgba(124, 58, 237, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      color: white;
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .btn-remediate {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: white;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+    }
+    .btn-remediate:hover {
+      background: linear-gradient(135deg, #047857 0%, #059669 100%);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-glow-emerald);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Live Pipeline Stepper */
+    .pipeline-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pipeline-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent-gemini);
+    }
+
+    .pipeline-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .pipeline-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge.idle { background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139, 148, 158, 0.3); }
+    .status-badge.reviewing { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-badge.remediation-required { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.4); box-shadow: var(--shadow-glow-rose); }
+    .status-badge.approved { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: var(--shadow-glow-emerald); }
+
+    .stepper-track {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1rem;
+      position: relative;
+    }
+
+    .step-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      padding: 0.75rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .step-node.active {
+      background: rgba(99, 102, 241, 0.08);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+    }
+
+    .step-node.success {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .step-node.warning {
+      background: rgba(244, 63, 94, 0.06);
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .step-icon-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 0.6rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid var(--border-subtle);
+      transition: all 0.3s ease;
+    }
+
+    .step-node.active .step-icon-circle {
+      border-color: var(--accent-purple);
+      background: rgba(124, 58, 237, 0.2);
+      animation: pulse 1.5s infinite;
+    }
+
+    .step-node.success .step-icon-circle {
+      border-color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-emerald);
+    }
+
+    .step-node.warning .step-icon-circle {
+      border-color: var(--accent-rose);
+      background: rgba(244, 63, 94, 0.2);
+      color: var(--accent-rose);
+    }
+
+    .step-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+    }
+
+    .step-subtext {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+    }
+
+    /* Grid Layout for Main Content */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.5rem;
+    }
+
+    /* Left Sidebar: Context Cards */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .info-label {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+    }
+
+    .info-value {
+      font-weight: 500;
+      color: var(--text-primary);
+      text-align: right;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+    }
+
+    /* Navigation Tabs */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.5rem;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      color: white;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    /* Tab Content Areas */
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Acceptance Criteria Matrix Table */
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .matrix-table th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .matrix-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .matrix-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .tag-pill.pass { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-pill.fail { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+    .tag-pill.pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    /* Finding Alert Box */
+    .finding-card {
+      background: rgba(244, 63, 94, 0.04);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .finding-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .finding-title {
+      font-weight: 700;
+      color: #fca5a5;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .finding-file {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .finding-desc {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+    }
+
+    /* Code & Diff Viewer */
+    .code-viewer-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .code-box {
+      background: #090c10;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-box-header {
+      background: #161b22;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      font-family: 'Fira Code', monospace;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    pre code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      display: block;
+      padding: 1rem;
+      overflow-x: auto;
+      max-height: 480px;
+      color: #c9d1d9;
+    }
+
+    /* Terminal Console */
+    .terminal-window {
+      background: #090c10;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .terminal-header {
+      background: #161b22;
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+
+    .terminal-body {
+      padding: 1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: #7ee787;
+      max-height: 420px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .log-line {
+      display: flex;
+      gap: 0.5rem;
+      word-break: break-all;
+    }
+
+    .log-time { color: #8b949e; }
+    .log-text { color: #e6edf3; }
+
+    /* Markdown Report View */
+    .markdown-view {
+      background: rgba(16, 21, 34, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1.75rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .markdown-view h1, .markdown-view h2, .markdown-view h3 {
+      font-family: 'Outfit', sans-serif;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      color: white;
+    }
+    .markdown-view p { margin-bottom: 0.8rem; color: #d1d5db; }
+    .markdown-view ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+    .markdown-view code {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand-group">
+      <div class="logo-badge">
+        <span>✦</span> JETSKI AI
+      </div>
+      <div>
+        <div class="brand-title">Autonomous SDLC Review & Remediation</div>
+        <div class="brand-subtitle">Non-Interactive CI/CD Agent & Architecture Governance</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="resetDemo()">
+        <span>🔄</span> Reset Demo
+      </div>
+      <button class="btn btn-primary" id="btn-review" onclick="triggerReview()">
+        <span>🔍</span> Run Architect Review
+      </button>
+      <button class="btn btn-remediate" id="btn-remediate" onclick="triggerRemediation()">
+        <span>🛠️</span> Autonomous Remediate
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div class="container">
+    
+    <!-- Pipeline Stepper Card -->
+    <div class="pipeline-card">
+      <div class="pipeline-title-row">
+        <div class="pipeline-title">
+          <span>🚀</span> Live SDLC Agentic Governance Pipeline
+        </div>
+        <div id="status-pill" class="status-badge idle">
+          <span id="status-dot">●</span> <span id="status-text">PIPELINE READY</span>
+        </div>
+      </div>
+
+      <div class="stepper-track">
+        <div class="step-node" id="step-node-1">
+          <div class="step-icon-circle">📥</div>
+          <div class="step-label">1. PR Intake</div>
+          <div class="step-subtext">PR #104 (alex-dev)</div>
+        </div>
+
+        <div class="step-node" id="step-node-2">
+          <div class="step-icon-circle">📋</div>
+          <div class="step-label">2. Jira Spec MCP</div>
+          <div class="step-subtext">PAY-204 Criteria</div>
+        </div>
+
+        <div class="step-node" id="step-node-3">
+          <div class="step-icon-circle">🤖</div>
+          <div class="step-label">3. Architect Review</div>
+          <div class="step-subtext">Jetski Non-Interactive</div>
+        </div>
+
+        <div class="step-node" id="step-node-4">
+          <div class="step-icon-circle">⚖️</div>
+          <div class="step-label">4. AC Audit</div>
+          <div class="step-subtext" id="step-4-sub">Criteria Check</div>
+        </div>
+
+        <div class="step-node" id="step-node-5">
+          <div class="step-icon-circle">🔧</div>
+          <div class="step-label">5. Auto-Remediate</div>
+          <div class="step-subtext">Self-Healing Loop</div>
+        </div>
+
+        <div class="step-node" id="step-node-6">
+          <div class="step-icon-circle">✅</div>
+          <div class="step-label">6. Verified Merge</div>
+          <div class="step-subtext" id="step-6-sub">Green Build Sign-off</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Content Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Sidebar Context -->
+      <div class="sidebar">
+        
+        <!-- GitHub PR Context -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>🐙</span> GitHub Pull Request
+            </div>
+            <span class="tag-pill pending" id="pr-status-badge">#104 OPEN</span>
+          </div>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">Title</span>
+              <span class="info-value" style="text-align:left; font-size:0.75rem;">feat: Loyalty Discounts [PAY-204]</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Author</span>
+              <span class="info-value">@alex-dev</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Branch</span>
+              <span class="info-value">feature/PAY-204</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Diff Stats</span>
+              <span class="info-value" style="color:#10b981;">+94</span> / <span class="info-value" style="color:#f43f5e;">-12</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Jira Ticket Context -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>🎯</span> Jira User Story
+            </div>
+            <span class="tag-pill pass">PAY-204</span>
+          </div>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">Summary</span>
+              <span class="info-value" style="text-align:left; font-size:0.75rem;">Tiered Loyalty (VIP 20%) & Voucher Safety</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Reporter</span>
+              <span class="info-value">Sarah Chen (PM)</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Priority</span>
+              <span class="info-value" style="color:#f59e0b;">High</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Criteria Count</span>
+              <span class="info-value">4 Acceptance Rules</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3rd-Party Integrations Status -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>🔌</span> Enterprise Integrations
+            </div>
+            <span class="tag-pill pass" id="integrations-mode-pill">LIVE / SANDBOX</span>
+          </div>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">GitHub API</span>
+              <span class="tag-pill pass" id="gh-status-badge">LIVE CONNECTED</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Atlassian Jira</span>
+              <span class="tag-pill pass" id="jira-status-badge">LIVE CONNECTED</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Vertex Model Garden</span>
+              <span class="tag-pill pass" id="gemini-status-badge">lean-w-me (gemini-2.0-flash)</span>
+            </div>
+            <div class="info-item" style="margin-top:0.4rem; border-top:1px dashed var(--border-subtle); padding-top:0.4rem;">
+              <span class="info-label">GCP Project</span>
+              <span class="info-value" style="font-size:0.75rem; color:var(--accent-cyan);">lean-w-me (us-central1)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Main Panel -->
+      <div class="main-panel">
+        
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="switchTab('tab-overview')">
+            <span>📊</span> Overview & AC Matrix
+          </button>
+          <button class="tab-btn" onclick="switchTab('tab-diff')">
+            <span>⚡</span> Code Diff & Patches
+          </button>
+          <button class="tab-btn" onclick="switchTab('tab-report')">
+            <span>📄</span> Architect Report
+          </button>
+          <button class="tab-btn" onclick="switchTab('tab-terminal')">
+            <span>💻</span> Live Agent Console
+          </button>
+        </div>
+
+        <!-- TAB 1: OVERVIEW & AC MATRIX -->
+        <div id="tab-overview" class="tab-pane active">
+          
+          <!-- Findings Summary (Visible after review) -->
+          <div id="findings-container" style="display:none; margin-bottom: 1.5rem;">
+            <div style="font-family:'Outfit', sans-serif; font-weight:700; font-size:1rem; margin-bottom:0.75rem; color:#fca5a5; display:flex; align-items:center; gap:0.5rem;">
+              <span>⚠️</span> Architect Review Findings (Remediation Required)
+            </div>
+            <div id="findings-list"></div>
+          </div>
+
+          <!-- Acceptance Criteria Matrix -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>📋</span> Jira Acceptance Criteria Compliance Matrix
+              </div>
+              <span class="brand-subtitle">Real-time verification against Pull Request diff</span>
+            </div>
+
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th style="width: 10%;">ID</th>
+                  <th style="width: 30%;">Acceptance Criterion</th>
+                  <th style="width: 45%;">Requirement Detail</th>
+                  <th style="width: 15%; text-align:center;">Compliance</th>
+                </tr>
+              </thead>
+              <tbody id="ac-matrix-body">
+                <tr>
+                  <td><span class="tag-pill pending">AC-1</span></td>
+                  <td style="font-weight:600;">VIP Platinum 20% Discount Rate</td>
+                  <td style="color:#8b949e;">CustomerTier.VIP_PLATINUM multiplier set to 0.20 ($80 on $100 cart)</td>
+                  <td style="text-align:center;"><span class="tag-pill pending">PENDING</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tag-pill pending">AC-2</span></td>
+                  <td style="font-weight:600;">Defensive Voucher Validation & Cap</td>
+                  <td style="color:#8b949e;">Validate voucher.is_active and enforce max_discount_amount cap</td>
+                  <td style="text-align:center;"><span class="tag-pill pending">PENDING</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tag-pill pending">AC-3</span></td>
+                  <td style="font-weight:600;">Comprehensive Unit Test Suite</td>
+                  <td style="color:#8b949e;">Assert $80 VIP outcome and cover inactive voucher & cap edge cases</td>
+                  <td style="text-align:center;"><span class="tag-pill pending">PENDING</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tag-pill pending">AC-4</span></td>
+                  <td style="font-weight:600;">Structured Audit Logging</td>
+                  <td style="color:#8b949e;">Emit audit_event_id, customer_id, subtotal, and discount via logger</td>
+                  <td style="text-align:center;"><span class="tag-pill pending">PENDING</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- TAB 2: CODE DIFF VIEWER -->
+        <div id="tab-diff" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>⚡</span> Side-by-Side: Developer PR vs Remediated Source
+              </div>
+              <span class="brand-subtitle">src/discount_service.py</span>
+            </div>
+
+            <div class="code-viewer-container">
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span>❌ Initial PR #104 (Flawed AC)</span>
+                  <span style="color:#f43f5e;">Buggy</span>
+                </div>
+                <pre><code id="code-left">// Loading...</code></pre>
+              </div>
+
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span>✅ Remediated by Jetski Agent</span>
+                  <span style="color:#10b981;">100% Compliant</span>
+                </div>
+                <pre><code id="code-right">// Loading...</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: ARCHITECT REPORT -->
+        <div id="tab-report" class="tab-pane">
+          <div class="markdown-view" id="markdown-report-content">
+            <h3>🤖 Jetski Senior Architect Review Report</h3>
+            <p>Click <strong>"Run Architect Review"</strong> to generate the deep architectural analysis report for PR #104.</p>
+          </div>
+        </div>
+
+        <!-- TAB 4: LIVE TERMINAL CONSOLE -->
+        <div id="tab-terminal" class="tab-pane">
+          <div class="terminal-window">
+            <div class="terminal-header">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+              <span style="font-family:'Fira Code', monospace; font-size:0.75rem; color:#8b949e; margin-left:0.5rem;">
+                jetski-agent-runtime --ci-mode --non-interactive
+              </span>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+              <div class="log-line">
+                <span class="log-time">[SYSTEM]</span>
+                <span class="log-text">Jetski SDLC Review & Remediation Environment Initialized. Ready for prompt execution.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    let currentState = {};
+
+    // Switch between tabs
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      const targetPane = document.getElementById(tabId);
+      if (targetPane) targetPane.classList.add('active');
+
+      if (tabId === 'tab-diff') {
+        loadDiffData();
+      }
+    }
+
+    // Fetch and render state
+    async function fetchState() {
+      try {
+        const res = await fetch('/api/state');
+        if (!res.ok) return;
+        const state = await res.json();
+        currentState = state;
+        renderState(state);
+      } catch (e) {
+        console.error("Error fetching state:", e);
+      }
+    }
+
+    function renderState(state) {
+      // 1. Update Status Badge
+      const statusPill = document.getElementById('status-pill');
+      const statusText = document.getElementById('status-text');
+      
+      statusPill.className = 'status-badge ' + (state.status || 'idle');
+      if (state.remediation_status === 'REMEDIATION_REQUIRED') {
+        statusPill.className = 'status-badge remediation-required';
+        statusText.innerText = 'REMEDIATION REQUIRED';
+      } else if (state.remediation_status === 'REMEDIATED_AND_VERIFIED') {
+        statusPill.className = 'status-badge approved';
+        statusText.innerText = 'VERIFIED & APPROVED';
+      } else if (state.status === 'reviewing') {
+        statusPill.className = 'status-badge reviewing';
+        statusText.innerText = 'REVIEWING DIFF...';
+      } else {
+        statusPill.className = 'status-badge idle';
+        statusText.innerText = 'PIPELINE READY';
+      }
+
+      // 2. Update Stepper Nodes
+      state.pipeline_steps.forEach((step, idx) => {
+        const node = document.getElementById(`step-node-${idx + 1}`);
+        if (!node) return;
+        node.className = 'step-node ' + (step.status || '');
+      });
+
+      // 3. Update AC Matrix Table
+      const acTbody = document.getElementById('ac-matrix-body');
+      if (state.acceptance_criteria && acTbody) {
+        acTbody.innerHTML = state.acceptance_criteria.map(ac => {
+          let pillClass = 'pending';
+          if (ac.status === 'PASS') pillClass = 'pass';
+          else if (ac.status === 'FAIL') pillClass = 'fail';
+
+          return `
+            <tr>
+              <td><span class="tag-pill ${pillClass}">${ac.id}</span></td>
+              <td style="font-weight:600;">${ac.title}</td>
+              <td style="color:#8b949e;">${ac.detail}</td>
+              <td style="text-align:center;"><span class="tag-pill ${pillClass}">${ac.status}</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 4. Update Findings List
+      const findingsContainer = document.getElementById('findings-container');
+      const findingsList = document.getElementById('findings-list');
+      if (state.review_findings && state.review_findings.length > 0 && state.remediation_status === 'REMEDIATION_REQUIRED') {
+        findingsContainer.style.display = 'block';
+        findingsList.innerHTML = state.review_findings.map(f => `
+          <div class="finding-card">
+            <div class="finding-header">
+              <span class="finding-title">❌ ${f.title} (${f.ac_id})</span>
+              <span class="finding-file">${f.file}</span>
+            </div>
+            <div class="finding-desc">${f.message}</div>
+          </div>
+        `).join('');
+      } else {
+        findingsContainer.style.display = 'none';
+      }
+
+      // 5. Update Integrations Status Badges
+      if (state.integrations) {
+        const gh = state.integrations.github;
+        const jira = state.integrations.jira;
+        const gem = state.integrations.gemini;
+
+        const ghBadge = document.getElementById('gh-status-badge');
+        if (ghBadge) {
+          ghBadge.className = 'tag-pill ' + (gh.authenticated ? 'pass' : 'pending');
+          ghBadge.innerText = gh.authenticated ? 'LIVE CONNECTED' : 'SANDBOX MODE';
+        }
+
+        const jiraBadge = document.getElementById('jira-status-badge');
+        if (jiraBadge) {
+          jiraBadge.className = 'tag-pill ' + (jira.authenticated ? 'pass' : 'pending');
+          jiraBadge.innerText = jira.authenticated ? 'LIVE CONNECTED' : 'SANDBOX (PAY-204)';
+        }
+
+        const gemBadge = document.getElementById('gemini-status-badge');
+        if (gemBadge) {
+          gemBadge.className = 'tag-pill ' + (gem.authenticated ? 'pass' : 'pending');
+          gemBadge.innerText = gem.authenticated ? 'LIVE (' + gem.model + ')' : 'SANDBOX DETERMINISTIC';
+        }
+      }
+
+      // 6. Update Terminal Logs
+      const terminalBody = document.getElementById('terminal-body');
+      if (state.logs && state.logs.length > 0) {
+        terminalBody.innerHTML = state.logs.map(log => `
+          <div class="log-line">
+            <span class="log-text">${log}</span>
+          </div>
+        `).join('');
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+      }
+    }
+
+    // Load Diff Viewer Data
+    async function loadDiffData() {
+      try {
+        const res = await fetch('/api/diff');
+        const diff = await res.json();
+        document.getElementById('code-left').innerText = diff.initial_code;
+        document.getElementById('code-right').innerText = diff.remediated_code;
+      } catch (e) {
+        console.error("Error loading diffs:", e);
+      }
+    }
+
+    // Trigger Actions
+    async function triggerReview() {
+      const btn = document.getElementById('btn-review');
+      btn.innerHTML = '<span>⏳</span> Reviewing...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/run-review', { method: 'POST' });
+        const state = await res.json();
+        renderState(state);
+      } finally {
+        btn.innerHTML = '<span>🔍</span> Run Architect Review';
+        btn.disabled = false;
+      }
+    }
+
+    async function triggerRemediation() {
+      const btn = document.getElementById('btn-remediate');
+      btn.innerHTML = '<span>⏳</span> Remediating...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/run-remediation', { method: 'POST' });
+        const state = await res.json();
+        renderState(state);
+      } finally {
+        btn.innerHTML = '<span>🛠️</span> Autonomous Remediate';
+        btn.disabled = false;
+      }
+    }
+
+    async function resetDemo() {
+      await fetch('/api/reset', { method: 'POST' });
+      await fetchState();
+    }
+
+    async function runTestsLive() {
+      const res = await fetch('/api/run-tests', { method: 'POST' });
+      const testRes = await res.json();
+      alert(`Test Execution Result:\n\n` + (testRes.stdout || testRes.stderr || 'Tests executed'));
+      await fetchState();
+    }
+
+    // Polling state every 2 seconds
+    fetchState();
+    setInterval(fetchState, 2000);
+  </script>
+</body>
+</html>

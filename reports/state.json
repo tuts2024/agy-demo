@@ -1,0 +1,111 @@
+{
+  "timestamp": "2026-08-12 23:19:32",
+  "status": "ready",
+  "current_stage": "idle",
+  "integrations": {
+    "github": {
+      "mode": "LIVE",
+      "target": "agy-demo",
+      "authenticated": true
+    },
+    "jira": {
+      "mode": "LIVE",
+      "target": "https://ntuteja.atlassian.net",
+      "authenticated": true
+    },
+    "gemini": {
+      "mode": "VERTEX AI MODEL GARDEN",
+      "model": "gemini-2.5-flash (Project: learn-w-me)",
+      "project_id": "learn-w-me",
+      "location": "us-central1",
+      "authenticated": true
+    }
+  },
+  "pr": {
+    "number": 104,
+    "title": "feat(checkout): Support loyalty discounts and voucher redemption [PAY-204]",
+    "author": "alex-dev",
+    "branch": "feature/PAY-204-tiered-discounts",
+    "target": "main",
+    "additions": 94,
+    "deletions": 12,
+    "linked_ticket": "PAY-204"
+  },
+  "jira": {
+    "key": "PAY-204",
+    "summary": "Implement Tiered Loyalty Discounts (VIP 20%) & Defensive Voucher Validation in Checkout Engine",
+    "status": "In Progress",
+    "priority": "High",
+    "reporter": "Sarah Chen (Product Manager)",
+    "assignee": "Alex Rivera"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-1",
+      "title": "VIP Platinum 20% Discount Rate",
+      "status": "PENDING",
+      "detail": "CustomerTier.VIP_PLATINUM must provide 20% discount (multiplier 0.20)."
+    },
+    {
+      "id": "AC-2",
+      "title": "Defensive Voucher Validation & Cap",
+      "status": "PENDING",
+      "detail": "Vouchers must check is_active and enforce max_discount_amount cap."
+    },
+    {
+      "id": "AC-3",
+      "title": "Comprehensive Unit Test Suite",
+      "status": "PENDING",
+      "detail": "Unit tests must assert 20% VIP outcome and test edge cases."
+    },
+    {
+      "id": "AC-4",
+      "title": "Structured Audit Logging",
+      "status": "PENDING",
+      "detail": "Emit structured audit logs with audit_event_id for compliance."
+    }
+  ],
+  "review_findings": [],
+  "remediation_status": "NOT_STARTED",
+  "test_results": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "details": "Legacy tests"
+  },
+  "pipeline_steps": [
+    {
+      "id": "step-1",
+      "name": "PR Intake & Metadata Parsing",
+      "status": "pending"
+    },
+    {
+      "id": "step-2",
+      "name": "Jira AC Extraction (MCP)",
+      "status": "pending"
+    },
+    {
+      "id": "step-3",
+      "name": "Jetski Architect Code Review",
+      "status": "pending"
+    },
+    {
+      "id": "step-4",
+      "name": "AC Compliance & Security Audit",
+      "status": "pending"
+    },
+    {
+      "id": "step-5",
+      "name": "Autonomous Code Remediation",
+      "status": "pending"
+    },
+    {
+      "id": "step-6",
+      "name": "Test Suite Verification & PR Sign-off",
+      "status": "pending"
+    }
+  ],
+  "logs": [
+    "[23:19:32] Environment reset to initial developer PR #104."
+  ]
+}

@@ -1,0 +1,36 @@
+diff --git a/src/discount_service.py b/src/discount_service.py
+index e84b2c1..9a3f781 100644
+--- a/src/discount_service.py
++++ b/src/discount_service.py
+@@ -10,12 +10,12 @@ class DiscountService:
+     TIER_DISCOUNTS = {
+         CustomerTier.STANDARD: 0.0,
+         CustomerTier.SILVER: 0.05,
+         CustomerTier.GOLD: 0.10,
+-        CustomerTier.VIP_PLATINUM: 0.10,
++        CustomerTier.VIP_PLATINUM: 0.10,  # PR sets 10% (Should be 20% per PAY-204 AC-1)
+     }
+ 
+     def calculate_discount(self, customer, items, voucher=None):
+         subtotal = self.calculate_cart_subtotal(items)
+         tier_rate = self.TIER_DISCOUNTS.get(customer.tier, 0.0)
+         tier_discount = round(subtotal * tier_rate, 2)
+         
+-        # Missing voucher.is_active check and max_discount_amount cap
++        voucher_discount = 0.0
++        if voucher is not None:
++            voucher_discount = round(subtotal * (voucher.discount_percentage / 100.0), 2)
++            
+         total_discount = min(subtotal, tier_discount + voucher_discount)
+         return DiscountResult(original_amount=subtotal, discount_amount=total_discount, ...)
+diff --git a/tests/test_discount_service.py b/tests/test_discount_service.py
+index d921a81..4c33e21 100644
+--- a/tests/test_discount_service.py
++++ b/tests/test_discount_service.py
+@@ -28,6 +28,6 @@ class TestDiscountService(unittest.TestCase):
+     def test_vip_platinum_discount_legacy(self):
+-        # Legacy assertion expecting $90.00 (10% discount) instead of $80.00 (20% discount)
+         result = self.service.calculate_discount(self.vip_cust, self.cart_items)
+         self.assertEqual(result.original_amount, 100.00)
+         self.assertEqual(result.discount_amount, 10.00)
+         self.assertEqual(result.final_amount, 90.00)

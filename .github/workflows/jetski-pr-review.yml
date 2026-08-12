@@ -1,0 +1,86 @@
+name: PR Automated Review & Remediation (Jetski Agent)
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+      - "bugfix/**"
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to review"
+        required: false
+        default: "104"
+
+jobs:
+  autonomous-code-review:
+    runs-on: ubuntu-latest
+    name: Jetski Autonomous Code Review
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number || '104' }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      REPO: ${{ github.repository }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ATLASSIAN_HOST: ${{ secrets.ATLASSIAN_HOST }}
+      ATLASSIAN_EMAIL: ${{ secrets.ATLASSIAN_EMAIL }}
+      ATLASSIAN_API_TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
+      JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY || 'PAY' }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Setup Node.js 22 (for MCP Servers)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run Jetski Autonomous Code Review
+        id: review
+        run: |
+          echo "🤖 Launching Jetski Agent Code Review for PR #$PR_NUMBER..."
+          python3 orchestrate_review.py --stage review --pr $PR_NUMBER
+          
+          # Append generated report to GitHub Step Summary
+          if [ -f reports/review-report-PR$PR_NUMBER.md ]; then
+            cat reports/review-report-PR$PR_NUMBER.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Extract remediation task if flagged
+          if grep -q "REMEDIATION_REQUIRED" reports/review-report-PR$PR_NUMBER.md 2>/dev/null; then
+            echo "needs_remediation=true" >> $GITHUB_OUTPUT
+            echo "remediation_task<<EOF" >> $GITHUB_OUTPUT
+            grep -A 10 "REMEDIATION_REQUIRED:" reports/review-report-PR$PR_NUMBER.md >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "needs_remediation=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Autonomous Self-Healing Remediation (If Required)
+        if: steps.review.outputs.needs_remediation == 'true'
+        run: |
+          echo "🔧 Remediation required. Launching Jetski Auto-Remediator Agent..."
+          python3 orchestrate_review.py --stage remediate --pr $PR_NUMBER
+          
+          echo "### 🛠️ Autonomous Remediation Summary" >> $GITHUB_STEP_SUMMARY
+          if [ -f reports/remediation-log-PR$PR_NUMBER.md ]; then
+            cat reports/remediation-log-PR$PR_NUMBER.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Verify Final Test Suite
+        run: |
+          echo "🧪 Running full test suite to guarantee green build..."
+          python3 -m unittest discover tests -v
