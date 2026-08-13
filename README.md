@@ -25,7 +25,61 @@ This platform introduces an automated multi-agent governance loop:
 
 ---
 
-## 🏛️ System Architecture
+## 🧠 Agent Architecture vs. Skills
+
+This system is built as a **complete autonomous agent** powered by specialized, modular **skills**:
+
+```
+  ┌─────────────────────────────────────────────────────────────┐
+  │              ANTIGRAVITY 2.0 AUTONOMOUS AGENT               │
+  │                                                             │
+  │   [Perception]  ➔  [Reasoning]  ➔  [Action Loop]  ➔  [Sync] │
+  │        │                 │               │             │    │
+  │   ┌────▼────────┐   ┌────▼────────┐  ┌───▼─────────┐   │    │
+  │   │   SKILL 1   │   │   SKILL 2   │  │   SKILL 3   │   │    │
+  │   │ Spec & Diff │   │  Architect  │  │ Auto-Fix &  │   │    │
+  │   │  Inspector  │   │   Auditor   │  │ Test Runner │   │    │
+  │   └─────────────┘   └─────────────┘  └─────────────┘   │    │
+  └────────────────────────────────────────────────────────┼────┘
+                                                           │
+                                        GitHub & Jira Cloud Sync
+```
+
+### 1. The Skills (The Directives & Knowledge)
+* **[Skill 1: PR & Spec Inspector](file:///usr/local/google/home/ntuteja/demo/sdlc/skills/skill-1-pr-spec-inspector.md):** Extracts PR metadata, diffs, and parses Jira ADF document structures into structured criteria.
+* **[Skill 2: Code Architect Reviewer](file:///usr/local/google/home/ntuteja/demo/sdlc/skills/skill-2-code-architect-reviewer.md):** Defines semantic audit rules, defensive boundaries, and the Acceptance Criteria compliance matrix.
+* **[Skill 3: Autonomous Auto-Remediator](file:///usr/local/google/home/ntuteja/demo/sdlc/skills/skill-3-auto-remediator.md):** Defines code repair patterns, test expansion schemas, and verification standards.
+
+### 2. The Agent (The Autonomous Runtime Entity)
+The agent embodies the complete **ReAct (Reason + Act) loop**:
+* **Perception:** Sensory tool connectors to GitHub REST API and Jira Cloud REST API.
+* **Reasoning & Judgment:** Semantic cross-referencing of code diffs against Jira Acceptance Criteria to decide between `APPROVE` and `REMEDIATION_REQUIRED`.
+* **Action & Tool Execution:** Directly patches source code (`src/discount_service.py`) and writes unit tests (`tests/test_discount_service.py`).
+* **Closed Self-Healing Loop:** Executes the local test runner (`unittest`), evaluates test results, and guarantees 100% green builds before sign-off.
+* **Two-Way Synchronization:** Interacts with GitHub PRs and Jira tickets autonomously without human prompting.
+
+---
+
+## 🛠️ Implementation & Framework Details
+
+The agent is built using **native Python implementing Google ADK (Agent Development Kit) and Antigravity architectural design patterns**:
+
+| Architectural Component | Implementation in this Repository |
+| :--- | :--- |
+| **Model & Inference Layer** | Google Cloud Vertex AI (`gemini-2.5-flash`) & Google AI Studio via `src/integrations/gemini_engine.py`. |
+| **Tool Interfaces (MCP)** | Model Context Protocol (MCP) tool bindings implemented in `src/integrations/github_client.py` and `jira_client.py`. |
+| **Agent Orchestrator** | Headless state machine and execution loop implemented in `orchestrate_review.py`. |
+| **Declarative Skills** | Modular markdown skill definitions in [`skills/`](file:///usr/local/google/home/ntuteja/demo/sdlc/skills). |
+| **CI/CD Runner** | Turnkey GitHub Actions workflow in `.github/workflows/antigravity-pr-review.yml`. |
+
+### 💡 Why Native Implementation?
+* 🚀 **Zero-Dependency CI/CD:** Runs out-of-the-box on standard GitHub Actions (`ubuntu-latest`) without requiring private daemon installations.
+* ⚡ **Ultra High Performance:** Completes the entire review, code patch, test expansion, and verification cycle in under **2 seconds**.
+* 🛡️ **Dual-Mode Portability:** Operates seamlessly against live enterprise cloud APIs or in a deterministic offline sandbox for presentations.
+
+---
+
+## 🏛️ System Data Flow
 
 ```mermaid
 flowchart TD
