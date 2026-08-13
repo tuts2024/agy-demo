@@ -1,4 +1,4 @@
-name: PR Automated Review & Remediation (Jetski Agent)
+name: PR Automated Review & Remediation (Antigravity 2.0 Agent)
 
 on:
   push:
@@ -18,7 +18,7 @@ on:
 jobs:
   autonomous-code-review:
     runs-on: ubuntu-latest
-    name: Jetski Autonomous Code Review
+    name: Antigravity 2.0 Autonomous Code Review
     permissions:
       contents: write
       pull-requests: write
@@ -49,10 +49,10 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Run Jetski Autonomous Code Review
+      - name: Run Antigravity 2.0 Autonomous Code Review
         id: review
         run: |
-          echo "🤖 Launching Jetski Agent Code Review for PR #$PR_NUMBER..."
+          echo "🤖 Launching Antigravity 2.0 Agent Code Review for PR #$PR_NUMBER..."
           python3 orchestrate_review.py --stage review --pr $PR_NUMBER
           
           # Append generated report to GitHub Step Summary
@@ -73,7 +73,7 @@ jobs:
       - name: Run Autonomous Self-Healing Remediation (If Required)
         if: steps.review.outputs.needs_remediation == 'true'
         run: |
-          echo "🔧 Remediation required. Launching Jetski Auto-Remediator Agent..."
+          echo "🔧 Remediation required. Launching Antigravity 2.0 Auto-Remediator Agent..."
           python3 orchestrate_review.py --stage remediate --pr $PR_NUMBER
           
           echo "### 🛠️ Autonomous Remediation Summary" >> $GITHUB_STEP_SUMMARY

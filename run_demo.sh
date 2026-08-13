@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Autonomous SDLC Code Review & Self-Healing Remediation Demo Launcher
-# Powered by Jetski AI / Gemini Agent
+# Powered by Antigravity 2.0 / Gemini Agent
 # ==============================================================================
 
 set -e

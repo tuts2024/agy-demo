@@ -28,7 +28,7 @@ class GitHubClient:
     def _headers(self, accept: str = "application/vnd.github.v3+json") -> Dict[str, str]:
         headers = {
             "Accept": accept,
-            "User-Agent": "Jetski-SDLC-Code-Review-Agent/1.0"
+            "User-Agent": "Antigravity-2.0-SDLC-Code-Review-Agent/2.0"
         }
         if self.token:
             headers["Authorization"] = f"token {self.token}"
@@ -117,7 +117,7 @@ class GitHubClient:
             if e.code == 422:
                 # GitHub prevents authors from approving their own PRs (422); fallback to formal verification comment
                 logger.info(f"Submitting verification summary as PR comment (due to GitHub policy: {e}).")
-                return self.post_pr_comment(pr_number, f"### ✅ Jetski Auto-Remediation Verification Passed\n\n{body}")
+                return self.post_pr_comment(pr_number, f"### ✅ Antigravity 2.0 Auto-Remediation Verification Passed\n\n{body}")
             logger.error(f"Failed to submit PR review: {e}")
             return False
         except Exception as e:

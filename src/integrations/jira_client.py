@@ -57,7 +57,7 @@ class JiraClient:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "User-Agent": "Jetski-SDLC-Jira-Integration/1.0"
+            "User-Agent": "Antigravity-2.0-SDLC-Jira-Integration/2.0"
         }
         if self.email and self.token:
             auth_str = f"{self.email}:{self.token}"

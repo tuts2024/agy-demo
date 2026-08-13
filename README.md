@@ -1,10 +1,10 @@
 # 🤖 Autonomous SDLC Code Review & Self-Healing Remediation Agent
 
-[![CI/CD Review & Remediation](https://github.com/tuts2024/agy-demo/actions/workflows/jetski-pr-review.yml/badge.svg)](https://github.com/tuts2024/agy-demo/actions/workflows/jetski-pr-review.yml)
+[![CI/CD Review & Remediation](https://github.com/tuts2024/agy-demo/actions/workflows/antigravity-pr-review.yml/badge.svg)](https://github.com/tuts2024/agy-demo/actions/workflows/antigravity-pr-review.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Jira Cloud Integrated](https://img.shields.io/badge/Jira%20Cloud-Connected-0052CC.svg?logo=jira)](https://ntuteja.atlassian.net)
 [![GitHub API](https://img.shields.io/badge/GitHub-REST%20v3-181717.svg?logo=github)](https://github.com/tuts2024/agy-demo)
-[![AI Architecture](https://img.shields.io/badge/Engine-Gemini%20%2F%20Jetski%20Architect-8E44AD.svg)](#architecture)
+[![AI Architecture](https://img.shields.io/badge/Engine-Gemini%20%2F%20Antigravity%202.0%20Architect-8E44AD.svg)](#architecture)
 
 An enterprise-grade, non-interactive autonomous agent pipeline that transforms traditional CI/CD from basic syntax linting into **semantic architecture governance and self-healing code remediation**.
 
@@ -35,7 +35,7 @@ flowchart TD
     end
 
     subgraph S2["2. SEMANTIC ARCHITECT AUDIT"]
-        ENG["🤖 Jetski / Gemini AI Architect Engine"]
+        ENG["🤖 Antigravity 2.0 / Gemini AI Architect Engine"]
         AC_CHECK{"Acceptance Criteria\nCompliance Check"}
     end
 
@@ -83,7 +83,7 @@ flowchart TD
 ```
 .
 ├── .github/workflows/
-│   └── jetski-pr-review.yml     # GitHub Actions workflow definition
+│   └── antigravity-pr-review.yml # GitHub Actions workflow definition
 ├── src/
 │   ├── models.py                # Core domain entities (Customer, Tier, Voucher)
 │   ├── discount_service.py      # Checkout discount & pricing calculation engine
