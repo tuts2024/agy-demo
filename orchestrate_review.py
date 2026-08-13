@@ -402,29 +402,42 @@ def get_initial_state() -> Dict[str, Any]:
         }
     }
 
+    jira_ticket_data = {
+        "key": "KAN-8" if jira.is_live else "PAY-204",
+        "summary": "Implement Tiered Loyalty Discounts (VIP 20%) & Defensive Voucher Validation in Checkout Engine",
+        "status": "In Progress",
+        "priority": "High",
+        "reporter": "ntuteja" if jira.is_live else "Sarah Chen (Product Manager)",
+        "assignee": "Unassigned" if jira.is_live else "Alex Rivera"
+    }
+
+    if jira.is_live:
+        try:
+            live_issue = jira.get_issue("KAN-8")
+            if live_issue and live_issue.get("summary"):
+                jira_ticket_data["key"] = live_issue.get("key", "KAN-8")
+                jira_ticket_data["summary"] = live_issue.get("summary", jira_ticket_data["summary"])
+                jira_ticket_data["reporter"] = live_issue.get("reporter", jira_ticket_data["reporter"])
+                jira_ticket_data["status"] = live_issue.get("status", jira_ticket_data["status"])
+        except Exception:
+            pass
+
     return {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "status": "ready",
         "current_stage": "idle",
         "integrations": integration_status,
         "pr": {
-            "number": 104,
-            "title": "feat(checkout): Support loyalty discounts and voucher redemption [PAY-204]",
-            "author": "alex-dev",
-            "branch": "feature/PAY-204-tiered-discounts",
+            "number": 1 if gh.is_live else 104,
+            "title": f"feat(checkout): Support loyalty discounts and voucher redemption [{jira_ticket_data['key']}]",
+            "author": "ntuteja" if gh.is_live else "alex-dev",
+            "branch": "feature/PAY-204-discounts" if gh.is_live else "feature/PAY-204-tiered-discounts",
             "target": "main",
             "additions": 94,
             "deletions": 12,
-            "linked_ticket": "PAY-204"
+            "linked_ticket": jira_ticket_data["key"]
         },
-        "jira": {
-            "key": "PAY-204",
-            "summary": "Implement Tiered Loyalty Discounts (VIP 20%) & Defensive Voucher Validation in Checkout Engine",
-            "status": "In Progress",
-            "priority": "High",
-            "reporter": "Sarah Chen (Product Manager)",
-            "assignee": "Alex Rivera"
-        },
+        "jira": jira_ticket_data,
         "acceptance_criteria": [
             {
                 "id": "AC-1",

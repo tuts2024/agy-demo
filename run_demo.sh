@@ -17,6 +17,10 @@ echo "📍 Workspace: $WORKSPACE_DIR"
 echo "🌐 UI Port:   http://localhost:$PORT/"
 echo ""
 
+# Free up port if previously running
+fuser -k "${PORT}/tcp" 2>/dev/null || true
+sleep 0.5
+
 # Reset state
 python3 orchestrate_review.py --reset
 
