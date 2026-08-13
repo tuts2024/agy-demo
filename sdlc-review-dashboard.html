@@ -666,19 +666,19 @@
         <div class="step-node" id="step-node-1">
           <div class="step-icon-circle">📥</div>
           <div class="step-label">1. PR Intake</div>
-          <div class="step-subtext">PR #104 (alex-dev)</div>
+          <div class="step-subtext" id="step-1-subtext">PR #3 (@ntuteja)</div>
         </div>
 
         <div class="step-node" id="step-node-2">
           <div class="step-icon-circle">📋</div>
           <div class="step-label">2. Jira Spec MCP</div>
-          <div class="step-subtext">PAY-204 Criteria</div>
+          <div class="step-subtext" id="step-2-subtext">KAN-8 Criteria</div>
         </div>
 
         <div class="step-node" id="step-node-3">
           <div class="step-icon-circle">🤖</div>
           <div class="step-label">3. Architect Review</div>
-          <div class="step-subtext">Jetski Non-Interactive</div>
+          <div class="step-subtext">Antigravity 2.0 Agent</div>
         </div>
 
         <div class="step-node" id="step-node-4">
@@ -713,20 +713,20 @@
             <div class="card-title">
               <span>🐙</span> GitHub Pull Request
             </div>
-            <span class="tag-pill pending" id="pr-status-badge">#104 OPEN</span>
+            <span class="tag-pill pending" id="pr-status-badge">#3 OPEN</span>
           </div>
           <div class="info-list">
             <div class="info-item">
               <span class="info-label">Title</span>
-              <span class="info-value" style="text-align:left; font-size:0.75rem;">feat: Loyalty Discounts [PAY-204]</span>
+              <span class="info-value" id="pr-title-val" style="text-align:left; font-size:0.75rem;">feat: Loyalty Discounts [KAN-8]</span>
             </div>
             <div class="info-item">
               <span class="info-label">Author</span>
-              <span class="info-value">@alex-dev</span>
+              <span class="info-value" id="pr-author-val">@ntuteja</span>
             </div>
             <div class="info-item">
               <span class="info-label">Branch</span>
-              <span class="info-value">feature/PAY-204</span>
+              <span class="info-value" id="pr-branch-val">feature/checkout-loyalty-discounts</span>
             </div>
             <div class="info-item">
               <span class="info-label">Diff Stats</span>
@@ -741,24 +741,24 @@
             <div class="card-title">
               <span>🎯</span> Jira User Story
             </div>
-            <span class="tag-pill pass">PAY-204</span>
+            <span class="tag-pill pass" id="jira-key-badge">KAN-8</span>
           </div>
           <div class="info-list">
             <div class="info-item">
               <span class="info-label">Summary</span>
-              <span class="info-value" style="text-align:left; font-size:0.75rem;">Tiered Loyalty (VIP 20%) & Voucher Safety</span>
+              <span class="info-value" id="jira-summary-val" style="text-align:left; font-size:0.75rem;">Tiered Loyalty (VIP 20%) & Voucher Safety</span>
             </div>
             <div class="info-item">
               <span class="info-label">Reporter</span>
-              <span class="info-value">Sarah Chen (PM)</span>
+              <span class="info-value" id="jira-reporter-val">ntuteja</span>
             </div>
             <div class="info-item">
               <span class="info-label">Priority</span>
-              <span class="info-value" style="color:#f59e0b;">High</span>
+              <span class="info-value" id="jira-priority-val" style="color:#f59e0b;">High</span>
             </div>
             <div class="info-item">
               <span class="info-label">Criteria Count</span>
-              <span class="info-value">4 Acceptance Rules</span>
+              <span class="info-value" id="jira-criteria-val">4 Acceptance Rules</span>
             </div>
           </div>
         </div>
@@ -988,6 +988,44 @@
         statusText.innerText = 'PIPELINE READY';
       }
 
+      // Update PR card
+      if (state.pr) {
+        const prBadge = document.getElementById('pr-status-badge');
+        if (prBadge) prBadge.innerText = `#${state.pr.number} OPEN`;
+        const prTitle = document.getElementById('pr-title-val');
+        if (prTitle) prTitle.innerText = state.pr.title;
+        const prAuthor = document.getElementById('pr-author-val');
+        if (prAuthor) prAuthor.innerText = `@${state.pr.author}`;
+        const prBranch = document.getElementById('pr-branch-val');
+        if (prBranch) prBranch.innerText = state.pr.branch;
+      }
+
+      // Update Jira card
+      if (state.jira) {
+        const jiraBadge = document.getElementById('jira-key-badge');
+        if (jiraBadge) jiraBadge.innerText = state.jira.key;
+        const jiraSummary = document.getElementById('jira-summary-val');
+        if (jiraSummary) jiraSummary.innerText = state.jira.summary;
+        const jiraReporter = document.getElementById('jira-reporter-val');
+        if (jiraReporter) jiraReporter.innerText = state.jira.reporter;
+        const jiraPriority = document.getElementById('jira-priority-val');
+        if (jiraPriority) jiraPriority.innerText = state.jira.priority;
+        const jiraCriteria = document.getElementById('jira-criteria-val');
+        if (jiraCriteria && state.acceptance_criteria) {
+          jiraCriteria.innerText = `${state.acceptance_criteria.length} Acceptance Rules`;
+        }
+      }
+
+      // Update Stepper Step subtexts
+      const step1Subtext = document.getElementById('step-1-subtext');
+      if (step1Subtext && state.pr) {
+        step1Subtext.innerText = `PR #${state.pr.number} (@${state.pr.author})`;
+      }
+      const step2Subtext = document.getElementById('step-2-subtext');
+      if (step2Subtext && state.jira) {
+        step2Subtext.innerText = `${state.jira.key} Criteria`;
+      }
+
       // 2. Update Stepper Nodes
       state.pipeline_steps.forEach((step, idx) => {
         const node = document.getElementById(`step-node-${idx + 1}`);
@@ -1047,7 +1085,7 @@
         const jiraBadge = document.getElementById('jira-status-badge');
         if (jiraBadge) {
           jiraBadge.className = 'tag-pill ' + (jira.authenticated ? 'pass' : 'pending');
-          jiraBadge.innerText = jira.authenticated ? 'LIVE CONNECTED' : 'SANDBOX (PAY-204)';
+          jiraBadge.innerText = jira.authenticated ? 'LIVE CONNECTED' : 'SANDBOX (KAN-8)';
         }
 
         const gemBadge = document.getElementById('gemini-status-badge');
