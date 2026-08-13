@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Helper script to create a fresh, open GitHub Pull Request for live presentations.
-Resets the base code on main, pushes the flawed feature branch, and opens a live PR.
+Interactive & Automated Live Demo PR Creator for Jetski SDLC.
+Resets the base code on main, pushes the flawed feature branch with rich git diffs,
+and opens a fresh, live GitHub Pull Request linked to Jira KAN-8.
 """
 
 import json
@@ -10,6 +11,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+import urllib.error
 from pathlib import Path
 
 WORKSPACE_DIR = Path(__file__).parent.resolve()
@@ -31,6 +33,7 @@ class DiscountService:
     Handles customer discount calculations and voucher redemptions.
     """
 
+    # Note: Developer bug in PR - VIP tier set to 0.10 instead of 0.20 (20%) per JIRA KAN-8 AC #1
     TIER_DISCOUNTS = {
         CustomerTier.STANDARD: 0.0,
         CustomerTier.SILVER: 0.05,
@@ -129,7 +132,7 @@ class TestDiscountService(unittest.TestCase):
         self.assertEqual(result.final_amount, 95.00)
 
     def test_vip_platinum_discount_legacy(self):
-        # ❌ Developer bug assertion: expecting $90 instead of $80
+        # ❌ Developer bug assertion: expecting $90 instead of $80 per KAN-8
         result = self.service.calculate_discount(self.vip_cust, self.cart_items)
         self.assertEqual(result.original_amount, 100.00)
         self.assertEqual(result.discount_amount, 10.00)
@@ -235,14 +238,19 @@ def create_github_pr(token: str, repo: str, title: str, head: str, base: str = "
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8") if e.fp else ""
+        try:
+            return json.loads(error_body)
+        except Exception:
+            return {"message": str(e), "error": error_body}
     except Exception as e:
-        print(f"GitHub API Error: {e}")
-        return {}
+        return {"message": str(e)}
 
 
 def main():
     print("======================================================================")
-    print("🚀 Initializing Live GitHub Pull Request for Demo...")
+    print("🚀 Initializing Fresh Live GitHub Pull Request for Demo")
     print("======================================================================")
 
     env_file = WORKSPACE_DIR / ".env"
@@ -258,32 +266,47 @@ def main():
         sys.exit(1)
 
     push_url = f"https://x-access-token:{token}@github.com/{repo}.git"
-    branch_name = "feature/checkout-loyalty-discounts"
 
-    print("📦 1. Setting up baseline code on main...")
+    # Commit all latest engine files first to current branch
+    subprocess.run(["git", "add", "-A"], cwd=WORKSPACE_DIR, check=True)
+    subprocess.run(["git", "commit", "-m", "chore: sync latest engine and integration tools", "--allow-empty"], cwd=WORKSPACE_DIR, check=True)
+
+    # 1. Update main branch with baseline code
+    print("📦 1. Setting up baseline pricing code on main...")
     subprocess.run(["git", "checkout", "main"], cwd=WORKSPACE_DIR, check=True)
+    # Merge latest tools into main
+    subprocess.run(["git", "merge", "feature/checkout-loyalty-discounts", "--no-edit"], cwd=WORKSPACE_DIR, check=False)
+    
     (WORKSPACE_DIR / "src" / "discount_service.py").write_text(BASE_DISCOUNT_SERVICE)
     (WORKSPACE_DIR / "tests" / "test_discount_service.py").write_text(BASE_TESTS)
-    subprocess.run(["git", "add", "-A"], cwd=WORKSPACE_DIR, check=True)
+    subprocess.run(["git", "add", "src/discount_service.py", "tests/test_discount_service.py"], cwd=WORKSPACE_DIR, check=True)
     subprocess.run(["git", "commit", "-m", "chore(base): baseline checkout pricing engine", "--allow-empty"], cwd=WORKSPACE_DIR, check=True)
     subprocess.run(["git", "push", push_url, "main", "--force"], cwd=WORKSPACE_DIR, check=True)
 
-    print(f"🌿 2. Creating feature branch '{branch_name}' with initial developer implementation...")
-    subprocess.run(["git", "checkout", "-B", branch_name, "main"], cwd=WORKSPACE_DIR, check=True)
-    (WORKSPACE_DIR / "src" / "discount_service.py").write_text(INITIAL_DISCOUNT_SERVICE_CODE)
-    (WORKSPACE_DIR / "tests" / "test_discount_service.py").write_text(INITIAL_TEST_CODE)
-    subprocess.run(["git", "add", "-A"], cwd=WORKSPACE_DIR, check=True)
-    subprocess.run(["git", "commit", "-m", "feat(checkout): Support loyalty discounts and voucher redemption [KAN-8]"], cwd=WORKSPACE_DIR, check=True)
-    subprocess.run(["git", "push", push_url, f"{branch_name}", "--force"], cwd=WORKSPACE_DIR, check=True)
+    # 2. Check if a new branch name is needed
+    branches_to_try = [
+        "feature/checkout-loyalty-discounts",
+        f"feature/loyalty-discounts-{int(time.time()) % 10000}",
+    ]
 
-    print("🐙 3. Opening new Pull Request on GitHub...")
-    pr_data = create_github_pr(
-        token=token,
-        repo=repo,
-        title="feat(checkout): Support loyalty discounts and voucher redemption [KAN-8]",
-        head=branch_name,
-        base="main",
-        body="""### Pull Request Description
+    pr_created = False
+    for branch_name in branches_to_try:
+        print(f"🌿 2. Creating feature branch '{branch_name}' with developer implementation...")
+        subprocess.run(["git", "checkout", "-B", branch_name, "main"], cwd=WORKSPACE_DIR, check=True)
+        (WORKSPACE_DIR / "src" / "discount_service.py").write_text(INITIAL_DISCOUNT_SERVICE_CODE)
+        (WORKSPACE_DIR / "tests" / "test_discount_service.py").write_text(INITIAL_TEST_CODE)
+        subprocess.run(["git", "add", "src/discount_service.py", "tests/test_discount_service.py"], cwd=WORKSPACE_DIR, check=True)
+        subprocess.run(["git", "commit", "-m", "feat(checkout): Support loyalty discounts and voucher redemption [KAN-8]", "--allow-empty"], cwd=WORKSPACE_DIR, check=True)
+        subprocess.run(["git", "push", push_url, f"{branch_name}", "--force"], cwd=WORKSPACE_DIR, check=True)
+
+        print(f"🐙 3. Submitting Pull Request on GitHub for branch '{branch_name}'...")
+        pr_data = create_github_pr(
+            token=token,
+            repo=repo,
+            title="feat(checkout): Support loyalty discounts and voucher redemption [KAN-8]",
+            head=branch_name,
+            base="main",
+            body="""### Pull Request Description
 Implements tiered customer loyalty discounts and promotional voucher redemption in the checkout service per JIRA specification [KAN-8].
 
 #### Changes:
@@ -294,18 +317,26 @@ Implements tiered customer loyalty discounts and promotional voucher redemption 
 #### Related Jira Issue:
 - **Story:** [KAN-8](https://ntuteja.atlassian.net) (Tiered Loyalty Discounts)
 """
-    )
+        )
 
-    if pr_data and pr_data.get("html_url"):
-        pr_url = pr_data.get("html_url")
-        pr_number = pr_data.get("number")
-        print(f"\n🎉 Successfully created open Pull Request #{pr_number}!")
-        print(f"👉 Live PR URL: {pr_url}")
-        print(f"👉 Actions Tab: https://github.com/{repo}/actions")
-    elif pr_data and pr_data.get("errors"):
-        print(f"ℹ️ Pull request status: {pr_data.get('message', '')} - {pr_data.get('errors')}")
-        print(f"👉 View open PRs at: https://github.com/{repo}/pulls")
-    else:
+        if pr_data and pr_data.get("html_url"):
+            pr_url = pr_data.get("html_url")
+            pr_number = pr_data.get("number")
+            print("\n" + "=" * 70)
+            print(f"🎉 SUCCESS! Open Pull Request Created: PR #{pr_number}")
+            print(f"👉 Live PR URL:      {pr_url}")
+            print(f"👉 GitHub Actions:    https://github.com/{repo}/actions")
+            print(f"👉 Live Dashboard:    http://localhost:8085/")
+            print("=" * 70 + "\n")
+            pr_created = True
+            break
+        elif pr_data and "already exists" in str(pr_data):
+            print(f"⚠️ Branch '{branch_name}' already has a PR. Creating fresh unique branch...")
+            continue
+        else:
+            print(f"ℹ️ Response: {pr_data}")
+
+    if not pr_created:
         print(f"👉 View open PRs at: https://github.com/{repo}/pulls")
 
 
