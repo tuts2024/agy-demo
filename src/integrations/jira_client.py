@@ -54,7 +54,11 @@ class JiraClient:
     def get_issue(self, issue_key: str) -> Dict[str, Any]:
         """Fetch Jira issue details and acceptance criteria."""
         if not self.is_live:
-            logger.info(f"[JIRA SANDBOX] Loading local specification fixture for Jira ticket '{issue_key}'")
+            missing = []
+            if not self.host: missing.append("ATLASSIAN_HOST")
+            if not self.email: missing.append("ATLASSIAN_EMAIL")
+            if not self.token: missing.append("ATLASSIAN_API_TOKEN")
+            logger.info(f"[JIRA SANDBOX] Loading local specification fixture for Jira ticket '{issue_key}' (Missing GitHub Secrets: {', '.join(missing) if missing else 'None'})")
             mock_path = Path(__file__).parents[2] / "jira" / f"{issue_key}-ticket.json"
             if not mock_path.exists():
                 mock_path = Path(__file__).parents[2] / "jira" / "PAY-204-ticket.json"
