@@ -19,7 +19,7 @@ class TestDiscountService(unittest.TestCase):
         self.cart_items = [
             Item("item-1", "Cloud Architecture Guide", 60.0, 1),
             Item("item-2", "Developer Mechanical Keyboard", 40.0, 1),
-        ]
+        ]  # Total subtotal = $100.00
 
     def test_standard_customer_no_tier_discount(self):
         result = self.service.calculate_discount(self.standard_cust, self.cart_items)
@@ -34,9 +34,10 @@ class TestDiscountService(unittest.TestCase):
         self.assertEqual(result.final_amount, 95.00)
 
     def test_vip_platinum_discount_legacy(self):
-        # ❌ Developer bug assertion: expecting $90 instead of $80
+        # ❌ Outdated test asserting old 10% discount outcome ($90.00) instead of required 20% ($80.00)
         result = self.service.calculate_discount(self.vip_cust, self.cart_items)
         self.assertEqual(result.original_amount, 100.00)
+        # Buggy test expecting 10.00 instead of 20.00
         self.assertEqual(result.discount_amount, 10.00)
         self.assertEqual(result.final_amount, 90.00)
 

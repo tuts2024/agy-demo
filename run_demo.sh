@@ -17,6 +17,11 @@ echo "📍 Workspace: $WORKSPACE_DIR"
 echo "🌐 UI Port:   http://localhost:$PORT/"
 echo ""
 
+# Clean up port if in use
+lsof -ti :${PORT} 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+fuser -k "${PORT}/tcp" 2>/dev/null || true
+sleep 1
+
 # Reset state
 python3 orchestrate_review.py --reset
 

@@ -15,11 +15,12 @@ class DiscountService:
     Handles customer discount calculations and voucher redemptions.
     """
 
+    # Note: Developer bug in PR #104 - VIP tier set to 0.10 instead of 0.20 (20%) per JIRA PAY-204 AC #1
     TIER_DISCOUNTS = {
         CustomerTier.STANDARD: 0.0,
         CustomerTier.SILVER: 0.05,
         CustomerTier.GOLD: 0.10,
-        CustomerTier.VIP_PLATINUM: 0.10,  # ❌ BUG: 10% instead of required 20%
+        CustomerTier.VIP_PLATINUM: 0.10,  # ❌ BUG: Should be 0.20 (20%)
     }
 
     def calculate_cart_subtotal(self, items: List[Item]) -> float:
@@ -34,6 +35,14 @@ class DiscountService:
         items: List[Item],
         voucher: Optional[Voucher] = None
     ) -> DiscountResult:
+        """
+        Calculate total discount for a customer cart.
+        
+        Rules:
+        1. Base discount from customer tier.
+        2. Voucher discount if valid.
+        3. Cap total discount to not exceed original amount.
+        """
         subtotal = self.calculate_cart_subtotal(items)
         applied_rules = []
 
@@ -47,24 +56,28 @@ class DiscountService:
                 applied_rules=["EMPTY_CART"]
             )
 
+        # 1. Customer Tier Discount
         tier_rate = self.TIER_DISCOUNTS.get(customer.tier, 0.0)
         tier_discount = round(subtotal * tier_rate, 2)
         
         if tier_rate > 0:
             applied_rules.append(f"TIER_{customer.tier.value}_{int(tier_rate*100)}%")
 
-        # ❌ GAPS: Missing voucher.is_active check and max_discount_amount cap
+        # 2. Voucher Logic (❌ BUG: Missing defensive check for inactive voucher or max discount cap)
         voucher_discount = 0.0
         voucher_code_applied = None
-        if voucher is not None:
-            raw_voucher_discount = round(subtotal * (voucher.discount_percentage / 100.0), 2)
-            voucher_discount = raw_voucher_discount
-            applied_rules.append(f"VOUCHER_{voucher.code}_{int(voucher.discount_percentage)}%")
-            voucher_code_applied = voucher.code
 
-        total_discount = min(subtotal, round(tier_discount + voucher_discount, 2))
+        if voucher is not None:
+            # ❌ BUG: Does not check voucher.is_active or validate expiration date
+            voucher_discount = round(subtotal * (voucher.discount_percentage / 100.0), 2)
+            voucher_code_applied = voucher.code
+            applied_rules.append(f"VOUCHER_{voucher.code}")
+
+        total_discount = min(subtotal, tier_discount + voucher_discount)
         final_amount = round(subtotal - total_discount, 2)
         effective_rate = round(total_discount / subtotal, 4) if subtotal > 0 else 0.0
+
+        # ❌ BUG: Missing structured audit log event (AC #4)
 
         return DiscountResult(
             original_amount=subtotal,

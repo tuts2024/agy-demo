@@ -910,6 +910,7 @@ def start_server(port: int = 8085):
     """Starts the local dashboard server."""
     class ThreadingServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         daemon_threads = True
+        allow_reuse_address = True
 
     server = ThreadingServer(("0.0.0.0", port), SdlcDashboardHandler)
     logger.info(f"✨ Live SDLC Code Review Dashboard running at: http://127.0.0.1:{port}/")
