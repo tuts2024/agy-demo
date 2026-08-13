@@ -88,18 +88,31 @@ class JiraClient:
         if isinstance(desc_obj, str):
             desc_text = desc_obj
         elif isinstance(desc_obj, dict):
-            # Extract plain text from ADF nodes
-            desc_text = json.dumps(desc_obj)
+            # Extract plain text cleanly from ADF nodes
+            def extract_text(node):
+                texts = []
+                if isinstance(node, dict):
+                    if node.get("type") == "text" and "text" in node:
+                        texts.append(node["text"])
+                    for v in node.values():
+                        texts.extend(extract_text(v))
+                elif isinstance(node, list):
+                    for item in node:
+                        texts.extend(extract_text(item))
+                return texts
+            extracted = extract_text(desc_obj)
+            desc_text = "\n".join(extracted) if extracted else json.dumps(desc_obj)
 
         # Parse Acceptance Criteria
         ac_list = []
         ac_matches = re.findall(r"(AC-?\d+[:\-\s]+[^\n\r]+)", desc_text)
         if ac_matches:
             for idx, match in enumerate(ac_matches, 1):
+                clean_match = match.strip().strip('"').strip("'").rstrip("\\")
                 ac_list.append({
                     "id": f"AC-{idx}",
-                    "title": match.strip(),
-                    "requirement": match.strip()
+                    "title": clean_match,
+                    "requirement": clean_match
                 })
         else:
             # Fallback to standard 4 ACs if custom field not explicitly mapped
