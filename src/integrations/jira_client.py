@@ -27,6 +27,22 @@ class JiraClient:
         email: Optional[str] = None,
         api_token: Optional[str] = None
     ):
+        # 1. Parse bundled secret (e.g. JIRA_AGY_DEMO) if provided
+        bundle = os.environ.get("JIRA_AGY_DEMO", "")
+        if bundle:
+            for line in bundle.splitlines():
+                line = line.strip()
+                if "=" in line and not line.startswith("#"):
+                    k, v = line.split("=", 1)
+                    k = k.strip()
+                    v = v.strip("\"' \r\n")
+                    if k == "ATLASSIAN_HOST" and not host:
+                        host = v
+                    elif k == "ATLASSIAN_EMAIL" and not email:
+                        email = v
+                    elif (k in ("ATLASSIAN_API_TOKEN", "JIRA_API_TOKEN")) and not api_token:
+                        api_token = v
+
         self.host = (host or os.environ.get("ATLASSIAN_HOST") or "").rstrip("/")
         self.email = email or os.environ.get("ATLASSIAN_EMAIL") or ""
         self.token = api_token or os.environ.get("ATLASSIAN_API_TOKEN") or os.environ.get("JIRA_API_TOKEN") or ""

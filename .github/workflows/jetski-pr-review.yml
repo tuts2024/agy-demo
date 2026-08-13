@@ -30,6 +30,7 @@ jobs:
       ATLASSIAN_HOST: ${{ secrets.ATLASSIAN_HOST }}
       ATLASSIAN_EMAIL: ${{ secrets.ATLASSIAN_EMAIL }}
       ATLASSIAN_API_TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
+      JIRA_AGY_DEMO: ${{ secrets.JIRA_AGY_DEMO }}
       JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY || 'PAY' }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
