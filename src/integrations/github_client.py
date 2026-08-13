@@ -66,10 +66,10 @@ class GitHubClient:
             raise
 
     def get_latest_open_pr_number(self) -> Optional[int]:
-        """Auto-discover the latest open PR number on GitHub."""
+        """Auto-discover the latest PR number on GitHub (open or recently created)."""
         if not self.is_live:
-            return 9
-        url = f"{self.base_url}/repos/{self.repo}/pulls?state=open&sort=created&direction=desc&per_page=1"
+            return 10
+        url = f"{self.base_url}/repos/{self.repo}/pulls?state=all&sort=created&direction=desc&per_page=1"
         try:
             raw = self._fetch_get(url)
             data = json.loads(raw.decode("utf-8"))
@@ -77,7 +77,7 @@ class GitHubClient:
                 return data[0].get("number")
         except Exception:
             pass
-        return 9
+        return 10
 
     def get_pull_request(self, pr_number: Optional[int] = None) -> Dict[str, Any]:
         """Fetch metadata for a pull request."""
