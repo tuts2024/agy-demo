@@ -1,0 +1,40 @@
+{
+  "pr_number": 6,
+  "verdict": "REMEDIATION_REQUIRED",
+  "findings_count": 4,
+  "ac_compliance_rate": 0.0,
+  "findings": [
+    {
+      "ac_id": "AC-1",
+      "title": "VIP Platinum 20% Discount Rate",
+      "status": "VIOLATION",
+      "severity": "CRITICAL",
+      "message": "DiscountService.TIER_DISCOUNTS[CustomerTier.VIP_PLATINUM] is configured to 0.10 (10%) instead of required 0.20 (20%).",
+      "file": "src/discount_service.py:22"
+    },
+    {
+      "ac_id": "AC-2",
+      "title": "Defensive Voucher Validation",
+      "status": "VIOLATION",
+      "severity": "HIGH",
+      "message": "Missing validation for voucher.is_active and voucher.max_discount_amount cap. Inactive vouchers are erroneously applied.",
+      "file": "src/discount_service.py:53"
+    },
+    {
+      "ac_id": "AC-3",
+      "title": "Unit Test Coverage & Assertions",
+      "status": "VIOLATION",
+      "severity": "HIGH",
+      "message": "tests/test_discount_service.py test_vip_platinum_discount_legacy still asserts obsolete $90.00 outcome. Missing inactive voucher test cases.",
+      "file": "tests/test_discount_service.py:33"
+    },
+    {
+      "ac_id": "AC-4",
+      "title": "Structured Audit Logging",
+      "status": "VIOLATION",
+      "severity": "MEDIUM",
+      "message": "No structured financial audit log emitted on successful discount calculation.",
+      "file": "src/discount_service.py:65"
+    }
+  ]
+}

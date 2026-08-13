@@ -856,14 +856,12 @@ class SdlcDashboardHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             state = load_state()
-            pr_num = state.get("pr", {}).get("number", 104)
+            pr_num = state.get("pr", {}).get("number") or 7
             review_file = REPORTS_DIR / f"review-report-PR{pr_num}.md"
             if not review_file.exists():
-                review_file = REPORTS_DIR / "review-report-PR104.md"
-            if not review_file.exists():
-                review_file = REPORTS_DIR / "review-report-PR1.md"
-            if not review_file.exists():
-                review_file = REPORTS_DIR / "review-report-PR3.md"
+                matching = sorted(REPORTS_DIR.glob("review-report-PR*.md"), reverse=True)
+                if matching:
+                    review_file = matching[0]
             content = review_file.read_text(encoding="utf-8") if review_file.exists() else "# Architect Review Report\n\nNo report generated yet. Click 'Run Architect Review'."
             self.wfile.write(json.dumps({"report": content}).encode("utf-8"))
             return
@@ -871,16 +869,13 @@ class SdlcDashboardHandler(http.server.SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_POST(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-
         if self.path == "/api/run-review":
             state_curr = load_state()
             pr_num = state_curr.get("pr", {}).get("number")
             state = run_stage_review(pr_num)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps(state).encode("utf-8"))
             return
@@ -890,6 +885,7 @@ class SdlcDashboardHandler(http.server.SimpleHTTPRequestHandler):
             state = run_stage_remediation(pr_num)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps(state).encode("utf-8"))
             return
@@ -897,6 +893,7 @@ class SdlcDashboardHandler(http.server.SimpleHTTPRequestHandler):
             state = reset_environment()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps(state).encode("utf-8"))
             return
@@ -904,6 +901,7 @@ class SdlcDashboardHandler(http.server.SimpleHTTPRequestHandler):
             res = run_unit_tests()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps(res).encode("utf-8"))
             return
