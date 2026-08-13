@@ -21,7 +21,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 # Import 3rd-Party Integration Clients
 from src.integrations.github_client import GitHubClient
@@ -422,16 +422,18 @@ def get_initial_state() -> Dict[str, Any]:
         except Exception:
             pass
 
+    latest_pr = gh.get_latest_open_pr_number() or 7
+
     return {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "status": "ready",
         "current_stage": "idle",
         "integrations": integration_status,
         "pr": {
-            "number": 3 if gh.is_live else 104,
+            "number": latest_pr,
             "title": f"feat(checkout): Support loyalty discounts and voucher redemption [{jira_ticket_data['key']}]",
             "author": "ntuteja" if gh.is_live else "alex-dev",
-            "branch": "feature/checkout-loyalty-discounts" if gh.is_live else "feature/PAY-204-tiered-discounts",
+            "branch": "feature/checkout-loyalty-discounts",
             "target": "main",
             "additions": 94,
             "deletions": 12,
@@ -505,7 +507,7 @@ def reset_environment():
     (SRC_DIR / "discount_service.py").write_text(INITIAL_DISCOUNT_SERVICE_CODE)
     (TESTS_DIR / "test_discount_service.py").write_text(INITIAL_TEST_CODE)
     state = get_initial_state()
-    state["logs"].append(f"[{time.strftime('%H:%M:%S')}] Environment reset to initial developer PR #104.")
+    state["logs"].append(f"[{time.strftime('%H:%M:%S')}] Environment reset to initial developer PR #{state['pr']['number']}.")
     save_state(state)
     logger.info("✅ Environment successfully reset.")
     return state
@@ -530,7 +532,7 @@ def run_unit_tests() -> Dict[str, Any]:
     }
 
 
-def run_stage_review(pr_number: int = 104) -> Dict[str, Any]:
+def run_stage_review(pr_number: Optional[int] = None) -> Dict[str, Any]:
     """
     Executes Stage 1 & 2: PR & Jira Spec Inspection + Senior Architect Code Review.
     Connects to live GitHub, Atlassian Jira, and Google Gemini API.
@@ -539,8 +541,11 @@ def run_stage_review(pr_number: int = 104) -> Dict[str, Any]:
     jira = JiraClient()
     gemini = GeminiEngine()
 
-    logger.info(f"🚀 Running Stage 1 & 2: Architectural Code Review for PR #{pr_number}...")
     state = load_state()
+    if not pr_number or pr_number == 104:
+        pr_number = state.get("pr", {}).get("number") or gh.get_latest_open_pr_number() or 7
+
+    logger.info(f"🚀 Running Stage 1 & 2: Architectural Code Review for PR #{pr_number}...")
     state["status"] = "reviewing"
     state["current_stage"] = "architect_review"
 
@@ -703,12 +708,18 @@ REMEDIATION_REQUIRED:
     return state
 
 
-def run_stage_remediation(pr_number: int = 104) -> Dict[str, Any]:
+def run_stage_remediation(pr_number: Optional[int] = None) -> Dict[str, Any]:
     """
     Executes Stage 3: Autonomous Code Remediation & Test Verification.
     """
-    logger.info(f"🛠️ Launching Stage 3: Autonomous Code Remediation for PR #{pr_number}...")
+    gh = GitHubClient()
+    jira = JiraClient()
+
     state = load_state()
+    if not pr_number or pr_number == 104:
+        pr_number = state.get("pr", {}).get("number") or gh.get_latest_open_pr_number() or 7
+
+    logger.info(f"🛠️ Launching Stage 3: Autonomous Code Remediation for PR #{pr_number}...")
     state["status"] = "remediating"
     state["current_stage"] = "auto_remediation"
     state["pipeline_steps"][4]["status"] = "running"
@@ -734,10 +745,8 @@ def run_stage_remediation(pr_number: int = 104) -> Dict[str, Any]:
     if test_res["passed"]:
         state["pipeline_steps"][4]["status"] = "success"
         state["pipeline_steps"][5]["status"] = "success"
-        state["acceptance_criteria"][0]["status"] = "PASS"
-        state["acceptance_criteria"][1]["status"] = "PASS"
-        state["acceptance_criteria"][2]["status"] = "PASS"
-        state["acceptance_criteria"][3]["status"] = "PASS"
+        for ac in state.get("acceptance_criteria", []):
+            ac["status"] = "PASS"
         state["remediation_status"] = "REMEDIATED_AND_VERIFIED"
         state["status"] = "approved"
 
@@ -867,14 +876,18 @@ class SdlcDashboardHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
 
         if self.path == "/api/run-review":
-            state = run_stage_review()
+            state_curr = load_state()
+            pr_num = state_curr.get("pr", {}).get("number")
+            state = run_stage_review(pr_num)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps(state).encode("utf-8"))
             return
         elif self.path == "/api/run-remediation":
-            state = run_stage_remediation()
+            state_curr = load_state()
+            pr_num = state_curr.get("pr", {}).get("number")
+            state = run_stage_remediation(pr_num)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
@@ -910,6 +923,7 @@ def start_server(port: int = 8085):
     """Starts the local dashboard server."""
     class ThreadingServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         daemon_threads = True
+        allow_reuse_address = True
 
     server = ThreadingServer(("0.0.0.0", port), SdlcDashboardHandler)
     logger.info(f"✨ Live SDLC Code Review Dashboard running at: http://127.0.0.1:{port}/")
@@ -924,7 +938,7 @@ def start_server(port: int = 8085):
 def main():
     parser = argparse.ArgumentParser(description="Autonomous SDLC Code Review & Remediation Orchestrator")
     parser.add_argument("--stage", choices=["review", "remediate", "all", "test", "reset"], help="Execute a specific stage")
-    parser.add_argument("--pr", type=int, default=104, help="Pull Request number")
+    parser.add_argument("--pr", type=int, default=None, help="Pull Request number (default: auto-detected active PR)")
     parser.add_argument("--serve", action="store_true", help="Start web dashboard server")
     parser.add_argument("--port", type=int, default=8085, help="Web server port (default: 8085)")
     parser.add_argument("--reset", action="store_true", help="Reset workspace to initial buggy PR state")
