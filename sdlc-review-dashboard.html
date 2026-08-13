@@ -952,6 +952,8 @@
 
       if (tabId === 'tab-diff') {
         loadDiffData();
+      } else if (tabId === 'tab-report') {
+        loadReportData();
       }
     }
 
@@ -1114,6 +1116,40 @@
       }
     }
 
+    // Load Architect Markdown Report
+    async function loadReportData() {
+      try {
+        const res = await fetch('/api/report');
+        const data = await res.json();
+        const container = document.getElementById('markdown-report-content');
+        if (data && data.report && container) {
+          let text = data.report;
+          // Format headers
+          text = text.replace(/^# (.*$)/gim, '<h1 style="font-size:1.4rem; font-weight:800; color:#f0f6fc; margin-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem;">$1</h1>');
+          text = text.replace(/^## (.*$)/gim, '<h2 style="font-size:1.15rem; font-weight:700; color:#818cf8; margin-top:1.25rem; margin-bottom:0.5rem;">$1</h2>');
+          text = text.replace(/^### (.*$)/gim, '<h3 style="font-size:1.0rem; font-weight:600; color:#cbd5e1; margin-top:1rem; margin-bottom:0.4rem;">$1</h3>');
+          text = text.replace(/^#### (.*$)/gim, '<h4 style="font-size:0.9rem; font-weight:600; color:#94a3b8; margin-top:0.75rem; margin-bottom:0.25rem;">$1</h4>');
+          // Format bold and italics
+          text = text.replace(/\*\*(.*?)\*\*/gim, '<strong style="color:#f8fafc;">$1</strong>');
+          text = text.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+          // Format inline code
+          text = text.replace(/`([^`]+)`/gim, '<code style="background:rgba(255,255,255,0.08); padding:0.15rem 0.4rem; border-radius:4px; font-family:\'Fira Code\', monospace; font-size:0.85em; color:#38bdf8;">$1</code>');
+          // Format code blocks
+          text = text.replace(/```text\n([\s\S]*?)\n```/gim, '<pre style="background:#090c10; padding:1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin:0.75rem 0; font-family:\'Fira Code\', monospace; font-size:0.8rem; color:#fca5a5; overflow-x:auto;"><code>$1</code></pre>');
+          text = text.replace(/```python\n([\s\S]*?)\n```/gim, '<pre style="background:#090c10; padding:1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin:0.75rem 0; font-family:\'Fira Code\', monospace; font-size:0.8rem; color:#a7f3d0; overflow-x:auto;"><code>$1</code></pre>');
+          text = text.replace(/```([\s\S]*?)```/gim, '<pre style="background:#090c10; padding:1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin:0.75rem 0; font-family:\'Fira Code\', monospace; font-size:0.8rem; overflow-x:auto;"><code>$1</code></pre>');
+          // Bullet points
+          text = text.replace(/^\* (.*$)/gim, '<li style="margin-left:1.25rem; margin-bottom:0.25rem; color:#cbd5e1;">$1</li>');
+          text = text.replace(/^- (.*$)/gim, '<li style="margin-left:1.25rem; margin-bottom:0.25rem; color:#cbd5e1;">$1</li>');
+          // Line breaks
+          text = text.replace(/\n\n/gim, '<br><br>');
+          container.innerHTML = text;
+        }
+      } catch (e) {
+        console.error("Error loading report:", e);
+      }
+    }
+
     // Trigger Actions
     async function triggerReview() {
       const btn = document.getElementById('btn-review');
@@ -1124,6 +1160,7 @@
         const res = await fetch('/api/run-review', { method: 'POST' });
         const state = await res.json();
         renderState(state);
+        loadReportData();
       } finally {
         btn.innerHTML = '<span>🔍</span> Run Architect Review';
         btn.disabled = false;

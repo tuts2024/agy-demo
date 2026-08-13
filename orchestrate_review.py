@@ -21,7 +21,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 # Import 3rd-Party Integration Clients
 from src.integrations.github_client import GitHubClient
@@ -530,7 +530,7 @@ def run_unit_tests() -> Dict[str, Any]:
     }
 
 
-def run_stage_review(pr_number: int = 104) -> Dict[str, Any]:
+def run_stage_review(pr_number: Optional[int] = None) -> Dict[str, Any]:
     """
     Executes Stage 1 & 2: PR & Jira Spec Inspection + Senior Architect Code Review.
     Connects to live GitHub, Atlassian Jira, and Google Gemini API.
@@ -539,8 +539,11 @@ def run_stage_review(pr_number: int = 104) -> Dict[str, Any]:
     jira = JiraClient()
     gemini = GeminiEngine()
 
-    logger.info(f"🚀 Running Stage 1 & 2: Architectural Code Review for PR #{pr_number}...")
     state = load_state()
+    if pr_number is None:
+        pr_number = state.get("pr", {}).get("number") or (1 if gh.is_live else 104)
+
+    logger.info(f"🚀 Running Stage 1 & 2: Architectural Code Review for PR #{pr_number}...")
     state["status"] = "reviewing"
     state["current_stage"] = "architect_review"
 
@@ -554,10 +557,14 @@ def run_stage_review(pr_number: int = 104) -> Dict[str, Any]:
 
     # Step 2: Jira Acceptance Criteria Extraction
     state["pipeline_steps"][1]["status"] = "running"
-    jira_key = "PAY-204"
+    jira_key = state.get("jira", {}).get("key") or ("KAN-8" if jira.is_live else "PAY-204")
     match = re.search(r"([A-Z]{2,10}-\d+)", str(pr_data.get("body", "")) + " " + str(pr_data.get("title", "")))
     if match:
-        jira_key = match.group(1)
+        extracted = match.group(1)
+        if jira.is_live and (extracted.startswith("KAN") or extracted == "KAN-8"):
+            jira_key = extracted
+        elif not jira.is_live:
+            jira_key = extracted
     
     jira_ticket = jira.get_issue(jira_key)
     state["jira"]["key"] = jira_ticket.get("key", jira_key)
@@ -703,12 +710,20 @@ REMEDIATION_REQUIRED:
     return state
 
 
-def run_stage_remediation(pr_number: int = 104) -> Dict[str, Any]:
+def run_stage_remediation(pr_number: Optional[int] = None) -> Dict[str, Any]:
     """
     Executes Stage 3: Autonomous Code Remediation & Test Verification.
     """
-    logger.info(f"🛠️ Launching Stage 3: Autonomous Code Remediation for PR #{pr_number}...")
+    gh = GitHubClient()
+    jira = JiraClient()
+    gemini = GeminiEngine()
+
     state = load_state()
+    if pr_number is None:
+        pr_number = state.get("pr", {}).get("number") or (1 if gh.is_live else 104)
+    jira_key = state.get("jira", {}).get("key") or ("KAN-8" if jira.is_live else "PAY-204")
+
+    logger.info(f"🛠️ Launching Stage 3: Autonomous Code Remediation for PR #{pr_number}...")
     state["status"] = "remediating"
     state["current_stage"] = "auto_remediation"
     state["pipeline_steps"][4]["status"] = "running"
@@ -840,6 +855,21 @@ class SdlcDashboardHandler(http.server.SimpleHTTPRequestHandler):
                 "remediated_tests": REMEDIATED_TEST_CODE
             }
             self.wfile.write(json.dumps(diff_data).encode("utf-8"))
+            return
+        elif self.path == "/api/report":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            state = load_state()
+            pr_num = state.get("pr", {}).get("number", 1)
+            report_file = REPORTS_DIR / f"review-report-PR{pr_num}.md"
+            if not report_file.exists():
+                report_file = REPORTS_DIR / "review-report-PR1.md"
+            if not report_file.exists():
+                report_file = REPORTS_DIR / "review-report-PR104.md"
+            content = report_file.read_text() if report_file.exists() else "# No review report generated yet.\nClick **'Run Architect Review'** to run the agent audit."
+            self.wfile.write(json.dumps({"report": content, "pr_number": pr_num}).encode("utf-8"))
             return
         
         return super().do_GET()
