@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Autonomous SDLC Code Review & Remediation Orchestrator (Powered by Jetski Agent).
+Autonomous SDLC Code Review & Remediation Orchestrator (Powered by Antigravity Agent).
 
 This script orchestrates the 3-stage agentic workflow:
   Stage 1: PR & Jira Spec Inspector (Parses PR #104 & PAY-204 Acceptance Criteria)
@@ -201,7 +201,7 @@ if __name__ == "__main__":
 REMEDIATED_DISCOUNT_SERVICE_CODE = '''"""
 Discount & Pricing Engine Service.
 Contains pricing calculation, tiered customer loyalty discounts, and voucher validation.
-REMEDIATED BY JETSKI AGENT - Compliant with JIRA PAY-204 Acceptance Criteria.
+REMEDIATED BY ANTIGRAVITY AGENT - Compliant with JIRA KAN-8 Acceptance Criteria.
 """
 
 from typing import Optional, List
@@ -308,7 +308,7 @@ class DiscountService:
 
 REMEDIATED_TEST_CODE = '''"""
 Unit tests for DiscountService.
-REMEDIATED BY JETSKI AGENT - Comprehensive test coverage for PAY-204 Acceptance Criteria.
+REMEDIATED BY ANTIGRAVITY AGENT - Comprehensive test coverage for KAN-8 Acceptance Criteria.
 """
 
 import unittest
@@ -477,7 +477,7 @@ def get_initial_state() -> Dict[str, Any]:
         "pipeline_steps": [
             {"id": "step-1", "name": "PR Intake & Metadata Parsing", "status": "pending"},
             {"id": "step-2", "name": "Jira AC Extraction (MCP)", "status": "pending"},
-            {"id": "step-3", "name": "Jetski Architect Code Review", "status": "pending"},
+            {"id": "step-3", "name": "Antigravity Architect Code Review", "status": "pending"},
             {"id": "step-4", "name": "AC Compliance & Security Audit", "status": "pending"},
             {"id": "step-5", "name": "Autonomous Code Remediation", "status": "pending"},
             {"id": "step-6", "name": "Test Suite Verification & PR Sign-off", "status": "pending"}
@@ -624,11 +624,11 @@ def run_stage_review(pr_number: Optional[int] = None) -> Dict[str, Any]:
     state["pipeline_steps"][3]["status"] = "warning"
     state["remediation_status"] = "REMEDIATION_REQUIRED"
 
-    state["logs"].append(f"[{time.strftime('%H:%M:%S')}] [Step 3] Jetski Senior Architect Agent completed deep code inspection ({'LIVE GEMINI' if gemini.is_live else 'GEMINI SANDBOX'}).")
+    state["logs"].append(f"[{time.strftime('%H:%M:%S')}] [Step 3] Antigravity Senior Architect Agent completed deep code inspection ({'LIVE GEMINI' if gemini.is_live else 'GEMINI SANDBOX'}).")
     state["logs"].append(f"[{time.strftime('%H:%M:%S')}] [Step 4] 4 Acceptance Criteria evaluated. 4 Deficiencies flagged -> Signal: REMEDIATION_REQUIRED.")
 
     # Generate Markdown Review Report
-    report_md = f"""# 🤖 Jetski Senior Architect Review Report — PR #{pr_number}
+    report_md = f"""# 🤖 Antigravity Senior Architect Review Report — PR #{pr_number}
 
 **Repository:** `{gh.repo}` | **Author:** `{state['pr']['author']}` | **Date:** `{time.strftime('%Y-%m-%d %H:%M:%S')}`
 **Linked Issue:** [{jira_ticket.get('key')}: {jira_ticket.get('summary')}](file://{JIRA_DIR / 'PAY-204-ticket.json'})
@@ -700,7 +700,7 @@ REMEDIATION_REQUIRED:
         gh.post_pr_review(pr_number, report_md, event="REQUEST_CHANGES")
         state["logs"].append(f"[{time.strftime('%H:%M:%S')}] [GitHub Live] Posted formal PR Review to #{pr_number}.")
     if jira.is_live:
-        jira.add_comment(jira_key, f"🤖 *Jetski SDLC Agent:* PR #{pr_number} flagged with `REMEDIATION_REQUIRED` due to AC divergence. See report.")
+        jira.add_comment(jira_key, f"🤖 *Antigravity SDLC Agent:* PR #{pr_number} flagged with `REMEDIATION_REQUIRED` due to AC divergence. See report.")
         state["logs"].append(f"[{time.strftime('%H:%M:%S')}] [Jira Live] Posted sync comment to {jira_key}.")
 
     save_state(state)
@@ -753,7 +753,7 @@ def run_stage_remediation(pr_number: Optional[int] = None) -> Dict[str, Any]:
         state["logs"].append(f"[{time.strftime('%H:%M:%S')}] [Step 6] Test suite executed: {test_res['total']} tests passed (100% GREEN).")
         state["logs"].append(f"[{time.strftime('%H:%M:%S')}] [Step 6] PR #{pr_number} approved and ready for automated merge!")
 
-        remediation_log = f"""# 🛠️ Jetski Autonomous Remediation Log — PR #{pr_number}
+        remediation_log = f"""# 🛠️ Antigravity Autonomous Remediation Log — PR #{pr_number}
 
 **Status:** ✅ **ALL ACCEPTANCE CRITERIA SATISFIED & VERIFIED**
 **Timestamp:** `{time.strftime('%Y-%m-%d %H:%M:%S')}`
@@ -796,8 +796,8 @@ def run_stage_remediation(pr_number: Optional[int] = None) -> Dict[str, Any]:
             gh.post_pr_review(pr_number, remediation_log, event="APPROVE")
             state["logs"].append(f"[{time.strftime('%H:%M:%S')}] [GitHub Live] Submitted formal PR APPROVAL review to #{pr_number}.")
         if jira.is_live:
-            jira_key = state.get("jira", {}).get("key", "PAY-204")
-            jira.add_comment(jira_key, f"✅ *Jetski SDLC Agent:* PR #{pr_number} successfully remediated. All Acceptance Criteria verified (100% Green test suite). Ready for merge.")
+            jira_key = state.get("jira", {}).get("key", "KAN-8")
+            jira.add_comment(jira_key, f"✅ *Antigravity SDLC Agent:* PR #{pr_number} successfully remediated. All Acceptance Criteria verified (100% Green test suite). Ready for merge.")
             state["logs"].append(f"[{time.strftime('%H:%M:%S')}] [Jira Live] Updated Jira ticket {jira_key} with resolution.")
     else:
         state["pipeline_steps"][4]["status"] = "error"

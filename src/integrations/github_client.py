@@ -39,7 +39,7 @@ class GitHubClient:
     def _headers(self, accept: str = "application/vnd.github.v3+json") -> Dict[str, str]:
         headers = {
             "Accept": accept,
-            "User-Agent": "Jetski-SDLC-Code-Review-Agent/1.0"
+            "User-Agent": "Antigravity-SDLC-Code-Review-Agent/1.0"
         }
         if self.token:
             headers["Authorization"] = f"token {self.token}"
@@ -161,7 +161,7 @@ class GitHubClient:
         except urllib.error.HTTPError as e:
             if e.code == 422 or "422" in str(e):
                 logger.info(f"Submitting review summary as PR comment (due to GitHub policy: {e}).")
-                return self.post_pr_comment(pr_number, f"### 🤖 Jetski Agent Code Review ({event})\n\n" + body)
+                return self.post_pr_comment(pr_number, f"### 🤖 Antigravity Agent Code Review ({event})\n\n" + body)
             logger.error(f"Failed to submit PR review: {e}")
             return False
         except Exception as e:

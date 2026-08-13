@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Interactive & Automated Live Demo PR Creator for Jetski SDLC.
+Interactive & Automated Live Demo PR Creator for Antigravity SDLC.
 Resets the base code on main, pushes the flawed feature branch with rich git diffs,
 and opens a fresh, live GitHub Pull Request linked to Jira KAN-8.
 """

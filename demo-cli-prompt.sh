@@ -6,11 +6,11 @@
 
 set -e
 
-PR_NUMBER=104
-JIRA_KEY="PAY-204"
+PR_NUMBER=7
+JIRA_KEY="KAN-8"
 
 echo "======================================================================"
-echo "🤖 [CI/CD RUNNER] Non-Interactive Jetski Agent Review"
+echo "🤖 [CI/CD RUNNER] Non-Interactive Antigravity Agent Review"
 echo "======================================================================"
 echo "PR Target: PR #$PR_NUMBER (alex-dev)"
 echo "Jira Spec: $JIRA_KEY (Tiered Loyalty Discounts)"

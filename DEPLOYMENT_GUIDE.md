@@ -10,7 +10,7 @@ This guide provides step-by-step instructions for deploying the **Autonomous SDL
 flowchart TD
     subgraph GitHub["GitHub Enterprise"]
         PR["Developer Opens Pull Request<br/>(e.g., PR #104)"]
-        GHA["GitHub Actions Workflow<br/>(.github/workflows/jetski-pr-review.yml)"]
+        GHA["GitHub Actions Workflow<br/>(.github/workflows/antigravity-pr-review.yml)"]
         PR_COMMENT["Formal Review Comment<br/>(REQUEST_CHANGES / APPROVE)"]
     end
 
@@ -19,7 +19,7 @@ flowchart TD
         JIRA_COMMENT["Jira Issue Audit Sync"]
     end
 
-    subgraph Agent["Jetski / Gemini Autonomous Engine"]
+    subgraph Agent["Antigravity / Gemini Autonomous Engine"]
         INSPECTOR["Skill 1: Spec & Diff Inspector"]
         ARCHITECT["Skill 2: Senior Architect Reviewer<br/>(Gemini 2.5 Pro / Flash)"]
         REMEDIATOR["Skill 3: Autonomous Auto-Remediator<br/>(Self-Healing Loop)"]
@@ -49,7 +49,7 @@ flowchart TD
 
 ### 1.2 Atlassian Jira API Token
 1. Log in to [Atlassian Account Security](https://id.atlassian.com/manage-profile/security/api-tokens).
-2. Click **Create API token** and assign a label (e.g. `jetski-sdlc-reviewer`).
+2. Click **Create API token** and assign a label (e.g. `antigravity-sdlc-reviewer`).
 3. Note your:
    - `ATLASSIAN_HOST` (e.g. `https://your-company.atlassian.net`)
    - `ATLASSIAN_EMAIL` (e.g. `service-account@your-company.com`)
@@ -63,9 +63,9 @@ flowchart TD
 
 ## 🚀 Step 2: Deploy to GitHub Actions (Turnkey CI/CD)
 
-1. In your target repository, copy the workflow file into `.github/workflows/jetski-pr-review.yml`:
+1. In your target repository, copy the workflow file into `.github/workflows/antigravity-pr-review.yml`:
    ```bash
-   cp .github/workflows/jetski-pr-review.yml /path/to/your-repo/.github/workflows/
+   cp .github/workflows/antigravity-pr-review.yml /path/to/your-repo/.github/workflows/
    ```
 
 2. Configure Repository Secrets:
@@ -109,5 +109,5 @@ For local testing or custom runner deployment:
 ## 🔒 Security & Compliance Best Practices
 
 - **Zero Secret Exposure:** API keys and credentials are never committed; they are read strictly from environment variables and encrypted CI/CD secrets.
-- **Branch Protection Rules:** You can configure GitHub Branch Protection to require the `Jetski Autonomous Code Review` status check to pass before merging into `main`.
+- **Branch Protection Rules:** You can configure GitHub Branch Protection to require the `Antigravity Autonomous Code Review` status check to pass before merging into `main`.
 - **Defensive Sandboxing:** In the absence of live API tokens, the system operates in a sandboxed, deterministic simulation mode to ensure presentations and offline evaluations never break.

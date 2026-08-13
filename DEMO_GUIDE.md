@@ -18,7 +18,7 @@ In standard CI/CD pipelines, automated checks are limited to syntax linting, sta
 | **Orchestration Engine** | [orchestrate_review.py](file:///usr/local/google/home/ntuteja/demo/sdlc/orchestrate_review.py) | Python engine supporting CLI stages and REST API backend. |
 | **Launcher Script** | [run_demo.sh](file:///usr/local/google/home/ntuteja/demo/sdlc/run_demo.sh) | One-command launcher (`./run_demo.sh [port]`). |
 | **CI/CD Script** | [demo-cli-prompt.sh](file:///usr/local/google/home/ntuteja/demo/sdlc/demo-cli-prompt.sh) | Terminal runner emulating GitHub Actions runner execution. |
-| **GitHub Actions** | [.github/workflows/jetski-pr-review.yml](file:///usr/local/google/home/ntuteja/demo/sdlc/.github/workflows/jetski-pr-review.yml) | Production CI/CD workflow definition. |
+| **GitHub Actions** | [.github/workflows/antigravity-pr-review.yml](file:///usr/local/google/home/ntuteja/demo/sdlc/.github/workflows/antigravity-pr-review.yml) | Production CI/CD workflow definition. |
 | **Jira Issue Context** | [jira/PAY-204-ticket.json](file:///usr/local/google/home/ntuteja/demo/sdlc/jira/PAY-204-ticket.json) | Mock Jira ticket specification with 4 Acceptance Criteria. |
 | **Skill 1: PR Inspector** | [skills/skill-1-pr-spec-inspector.md](file:///usr/local/google/home/ntuteja/demo/sdlc/skills/skill-1-pr-spec-inspector.md) | Ingestion & Jira context extraction skill. |
 | **Skill 2: Architect Reviewer** | [skills/skill-2-code-architect-reviewer.md](file:///usr/local/google/home/ntuteja/demo/sdlc/skills/skill-2-code-architect-reviewer.md) | Senior Architect code analysis & AC verification skill. |
