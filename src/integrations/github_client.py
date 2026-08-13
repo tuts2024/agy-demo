@@ -31,7 +31,7 @@ class GitHubClient:
 
     def __init__(self, token: Optional[str] = None, repo: Optional[str] = None):
         _load_env()
-        self.token = token or os.environ.get("GITHUB_TOKEN") or os.environ.get("REPO_ACCESS_TOKEN") or os.environ.get("GH_TOKEN") or os.environ.get("GH_PAT") or os.environ.get("PAT_TOKEN")
+        self.token = token or os.environ.get("REPO_ACCESS_TOKEN") or os.environ.get("GH_PAT") or os.environ.get("PAT_TOKEN") or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
         self.repo = repo or os.environ.get("GITHUB_REPOSITORY") or os.environ.get("REPO") or "tuts2024/agy-demo"
         self.base_url = "https://api.github.com"
         self.is_live = bool(self.token)
@@ -42,7 +42,7 @@ class GitHubClient:
             "User-Agent": "Antigravity-SDLC-Code-Review-Agent/1.0"
         }
         if self.token:
-            headers["Authorization"] = f"token {self.token}"
+            headers["Authorization"] = f"Bearer {self.token}"
         return headers
 
     def get_latest_open_pr_number(self) -> Optional[int]:
