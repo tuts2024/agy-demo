@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-08-12 23:37:52",
+  "timestamp": "2026-08-13 02:41:22",
   "status": "ready",
   "current_stage": "idle",
   "integrations": {
     "github": {
       "mode": "LIVE",
-      "target": "agy-demo",
+      "target": "tuts2024/agy-demo",
       "authenticated": true
     },
     "jira": {
@@ -15,29 +15,29 @@
     },
     "gemini": {
       "mode": "VERTEX AI MODEL GARDEN",
-      "model": "gemini-2.5-flash (Project: learn-w-me)",
+      "model": "gemini-3.5-flash (Project: learn-w-me)",
       "project_id": "learn-w-me",
       "location": "us-central1",
       "authenticated": true
     }
   },
   "pr": {
-    "number": 104,
-    "title": "feat(checkout): Support loyalty discounts and voucher redemption [PAY-204]",
-    "author": "alex-dev",
-    "branch": "feature/PAY-204-tiered-discounts",
+    "number": 3,
+    "title": "feat(checkout): Support loyalty discounts and voucher redemption [KAN-8]",
+    "author": "ntuteja",
+    "branch": "feature/checkout-loyalty-discounts",
     "target": "main",
     "additions": 94,
     "deletions": 12,
-    "linked_ticket": "PAY-204"
+    "linked_ticket": "KAN-8"
   },
   "jira": {
-    "key": "PAY-204",
+    "key": "KAN-8",
     "summary": "Implement Tiered Loyalty Discounts (VIP 20%) & Defensive Voucher Validation in Checkout Engine",
-    "status": "In Progress",
+    "status": "To Do",
     "priority": "High",
-    "reporter": "Sarah Chen (Product Manager)",
-    "assignee": "Alex Rivera"
+    "reporter": "ntuteja",
+    "assignee": "Unassigned"
   },
   "acceptance_criteria": [
     {
@@ -106,6 +106,6 @@
     }
   ],
   "logs": [
-    "[23:37:52] Environment reset to initial developer PR #104."
+    "[02:41:22] Environment reset to initial developer PR #104."
   ]
 }
