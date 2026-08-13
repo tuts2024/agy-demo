@@ -128,14 +128,20 @@ class JiraClient:
                 {"id": "AC-4", "title": "Audit Logging", "requirement": "Structured audit trail"}
             ]
 
+        project_obj = fields.get("project") or {}
+        status_obj = fields.get("status") or {}
+        priority_obj = fields.get("priority") or {}
+        reporter_obj = fields.get("reporter") or {}
+        assignee_obj = fields.get("assignee") or {}
+
         return {
             "key": issue_key,
-            "project_name": fields.get("project", {}).get("name", "Payments"),
+            "project_name": project_obj.get("name", "Payments"),
             "summary": summary,
-            "status": fields.get("status", {}).get("name", "In Progress"),
-            "priority": fields.get("priority", {}).get("name", "High"),
-            "reporter": fields.get("reporter", {}).get("displayName", "PM"),
-            "assignee": fields.get("assignee", {}).get("displayName", "Unassigned"),
+            "status": status_obj.get("name", "In Progress"),
+            "priority": priority_obj.get("name", "High"),
+            "reporter": reporter_obj.get("displayName", "PM"),
+            "assignee": assignee_obj.get("displayName", "Unassigned"),
             "acceptance_criteria": ac_list
         }
 
