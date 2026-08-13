@@ -666,13 +666,13 @@
         <div class="step-node" id="step-node-1">
           <div class="step-icon-circle">📥</div>
           <div class="step-label">1. PR Intake</div>
-          <div class="step-subtext">PR #104 (alex-dev)</div>
+          <div class="step-subtext" id="step-1-sub">PR #1 (ntuteja)</div>
         </div>
 
         <div class="step-node" id="step-node-2">
           <div class="step-icon-circle">📋</div>
           <div class="step-label">2. Jira Spec MCP</div>
-          <div class="step-subtext">PAY-204 Criteria</div>
+          <div class="step-subtext" id="step-2-sub">KAN-8 Criteria</div>
         </div>
 
         <div class="step-node" id="step-node-3">
@@ -713,20 +713,20 @@
             <div class="card-title">
               <span>🐙</span> GitHub Pull Request
             </div>
-            <span class="tag-pill pending" id="pr-status-badge">#104 OPEN</span>
+            <span class="tag-pill pending" id="pr-card-badge">#1 OPEN</span>
           </div>
           <div class="info-list">
             <div class="info-item">
               <span class="info-label">Title</span>
-              <span class="info-value" style="text-align:left; font-size:0.75rem;">feat: Loyalty Discounts [PAY-204]</span>
+              <span class="info-value" id="pr-card-title" style="text-align:left; font-size:0.75rem;">feat: Loyalty Discounts [KAN-8]</span>
             </div>
             <div class="info-item">
               <span class="info-label">Author</span>
-              <span class="info-value">@alex-dev</span>
+              <span class="info-value" id="pr-card-author">@ntuteja</span>
             </div>
             <div class="info-item">
               <span class="info-label">Branch</span>
-              <span class="info-value">feature/PAY-204</span>
+              <span class="info-value" id="pr-card-branch">feature/PAY-204-discounts</span>
             </div>
             <div class="info-item">
               <span class="info-label">Diff Stats</span>
@@ -741,20 +741,20 @@
             <div class="card-title">
               <span>🎯</span> Jira User Story
             </div>
-            <span class="tag-pill pass">PAY-204</span>
+            <span class="tag-pill pass" id="jira-card-key">KAN-8</span>
           </div>
           <div class="info-list">
             <div class="info-item">
               <span class="info-label">Summary</span>
-              <span class="info-value" style="text-align:left; font-size:0.75rem;">Tiered Loyalty (VIP 20%) & Voucher Safety</span>
+              <span class="info-value" id="jira-card-summary" style="text-align:left; font-size:0.75rem;">Implement Tiered Loyalty Discounts (VIP 20%) & Defensive Voucher Validation in Checkout Engine</span>
             </div>
             <div class="info-item">
               <span class="info-label">Reporter</span>
-              <span class="info-value">Sarah Chen (PM)</span>
+              <span class="info-value" id="jira-card-reporter">ntuteja</span>
             </div>
             <div class="info-item">
               <span class="info-label">Priority</span>
-              <span class="info-value" style="color:#f59e0b;">High</span>
+              <span class="info-value" id="jira-card-priority" style="color:#f59e0b;">High</span>
             </div>
             <div class="info-item">
               <span class="info-label">Criteria Count</span>
@@ -1032,7 +1032,40 @@
         findingsContainer.style.display = 'none';
       }
 
-      // 5. Update Integrations Status Badges
+      // 5. Update Stepper Subtext
+      if (state.pr) {
+        const step1Sub = document.getElementById('step-1-sub');
+        if (step1Sub) step1Sub.innerText = `PR #${state.pr.number || 1} (@${state.pr.author || 'ntuteja'})`;
+      }
+      if (state.jira) {
+        const step2Sub = document.getElementById('step-2-sub');
+        if (step2Sub) step2Sub.innerText = `${state.jira.key || 'KAN-8'} Criteria`;
+      }
+
+      // 6. Update PR & Jira Sidebar Cards
+      if (state.pr) {
+        const prBadge = document.getElementById('pr-card-badge');
+        const prTitle = document.getElementById('pr-card-title');
+        const prAuthor = document.getElementById('pr-card-author');
+        const prBranch = document.getElementById('pr-card-branch');
+        if (prBadge) prBadge.innerText = `#${state.pr.number || 1} OPEN`;
+        if (prTitle) prTitle.innerText = state.pr.title || '';
+        if (prAuthor) prAuthor.innerText = '@' + (state.pr.author || 'ntuteja');
+        if (prBranch) prBranch.innerText = state.pr.branch || '';
+      }
+
+      if (state.jira) {
+        const jiraKey = document.getElementById('jira-card-key');
+        const jiraSummary = document.getElementById('jira-card-summary');
+        const jiraReporter = document.getElementById('jira-card-reporter');
+        const jiraPriority = document.getElementById('jira-card-priority');
+        if (jiraKey) jiraKey.innerText = state.jira.key || 'KAN-8';
+        if (jiraSummary) jiraSummary.innerText = state.jira.summary || '';
+        if (jiraReporter) jiraReporter.innerText = state.jira.reporter || 'ntuteja';
+        if (jiraPriority) jiraPriority.innerText = state.jira.priority || 'High';
+      }
+
+      // 7. Update Integrations Status Badges
       if (state.integrations) {
         const gh = state.integrations.github;
         const jira = state.integrations.jira;
@@ -1047,7 +1080,7 @@
         const jiraBadge = document.getElementById('jira-status-badge');
         if (jiraBadge) {
           jiraBadge.className = 'tag-pill ' + (jira.authenticated ? 'pass' : 'pending');
-          jiraBadge.innerText = jira.authenticated ? 'LIVE CONNECTED' : 'SANDBOX (PAY-204)';
+          jiraBadge.innerText = jira.authenticated ? 'LIVE CONNECTED' : 'SANDBOX MODE';
         }
 
         const gemBadge = document.getElementById('gemini-status-badge');
@@ -1057,7 +1090,7 @@
         }
       }
 
-      // 6. Update Terminal Logs
+      // 8. Update Terminal Logs
       const terminalBody = document.getElementById('terminal-body');
       if (state.logs && state.logs.length > 0) {
         terminalBody.innerHTML = state.logs.map(log => `
