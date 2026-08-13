@@ -75,7 +75,12 @@ class JiraClient:
                 return self._parse_jira_response(issue_key, data)
         except Exception as e:
             logger.error(f"Failed to fetch live Jira issue '{issue_key}': {e}. Falling back to fixture.")
-            return self.get_issue("PAY-204")
+            mock_path = Path(__file__).parents[2] / "jira" / f"{issue_key}-ticket.json"
+            if not mock_path.exists():
+                mock_path = Path(__file__).parents[2] / "jira" / "PAY-204-ticket.json"
+            if mock_path.exists():
+                return json.loads(mock_path.read_text())
+            return {"key": issue_key, "summary": f"User Story {issue_key}", "acceptance_criteria": []}
 
     def _parse_jira_response(self, issue_key: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Extracts structured acceptance criteria from Jira API response."""
