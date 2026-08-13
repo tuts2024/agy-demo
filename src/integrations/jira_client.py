@@ -69,6 +69,9 @@ class JiraClient:
 
     def get_issue(self, issue_key: str) -> Dict[str, Any]:
         """Fetch Jira issue details and acceptance criteria."""
+        if self.is_live and issue_key == "PAY-204":
+            issue_key = "KAN-8"
+
         if not self.is_live:
             missing = []
             if not self.host: missing.append("ATLASSIAN_HOST")
@@ -167,6 +170,9 @@ class JiraClient:
 
     def add_comment(self, issue_key: str, comment_body: str) -> bool:
         """Post a comment back to the Jira ticket with review findings."""
+        if self.is_live and issue_key == "PAY-204":
+            issue_key = "KAN-8"
+
         if not self.is_live:
             logger.info(f"[JIRA SANDBOX] Simulated comment posted to Jira ticket '{issue_key}' ({len(comment_body)} chars)")
             return True

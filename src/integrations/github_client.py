@@ -36,6 +36,9 @@ class GitHubClient:
 
     def get_pull_request(self, pr_number: int) -> Dict[str, Any]:
         """Fetch metadata for a pull request."""
+        if self.is_live and pr_number == 104:
+            pr_number = 1
+
         if not self.is_live:
             logger.info(f"[GITHUB SANDBOX] Fetching local mock metadata for PR #{pr_number}")
             mock_path = Path(__file__).parents[2] / "github" / f"pr_{pr_number}_metadata.json"
@@ -60,6 +63,9 @@ class GitHubClient:
 
     def get_pull_request_diff(self, pr_number: int) -> str:
         """Fetch raw unified diff of the PR."""
+        if self.is_live and pr_number == 104:
+            pr_number = 1
+
         if not self.is_live:
             logger.info(f"[GITHUB SANDBOX] Fetching local diff patch for PR #{pr_number}")
             mock_diff = Path(__file__).parents[2] / "github" / "pr_104_diff.patch"
@@ -79,6 +85,9 @@ class GitHubClient:
 
     def post_pr_comment(self, pr_number: int, comment_body: str) -> bool:
         """Post a comment to a Pull Request or Issue."""
+        if self.is_live and pr_number == 104:
+            pr_number = 1
+
         if not self.is_live:
             logger.info(f"[GITHUB SANDBOX] Simulated comment posted to PR #{pr_number} ({len(comment_body)} chars)")
             return True
@@ -99,6 +108,9 @@ class GitHubClient:
         Submit a formal Pull Request Review.
         event can be: 'APPROVE', 'REQUEST_CHANGES', or 'COMMENT'
         """
+        if self.is_live and pr_number == 104:
+            pr_number = 1
+
         if not self.is_live:
             logger.info(f"[GITHUB SANDBOX] Simulated review submission for PR #{pr_number} with event={event}")
             return True

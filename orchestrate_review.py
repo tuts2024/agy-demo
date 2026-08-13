@@ -937,7 +937,7 @@ def start_server(port: int = 8085):
 def main():
     parser = argparse.ArgumentParser(description="Autonomous SDLC Code Review & Remediation Orchestrator")
     parser.add_argument("--stage", choices=["review", "remediate", "all", "test", "reset"], help="Execute a specific stage")
-    parser.add_argument("--pr", type=int, default=104, help="Pull Request number")
+    parser.add_argument("--pr", type=int, default=None, help="Pull Request number (default: auto-detected)")
     parser.add_argument("--serve", action="store_true", help="Start web dashboard server")
     parser.add_argument("--port", type=int, default=8085, help="Web server port (default: 8085)")
     parser.add_argument("--reset", action="store_true", help="Reset workspace to initial buggy PR state")

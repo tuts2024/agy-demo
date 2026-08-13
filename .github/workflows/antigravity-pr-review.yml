@@ -13,7 +13,7 @@ on:
       pr_number:
         description: "PR number to review"
         required: false
-        default: "104"
+        default: "1"
 
 jobs:
   autonomous-code-review:
@@ -23,7 +23,7 @@ jobs:
       contents: write
       pull-requests: write
     env:
-      PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number || '104' }}
+      PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number || '1' }}
       GITHUB_REPOSITORY: ${{ github.repository }}
       REPO: ${{ github.repository }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -31,7 +31,7 @@ jobs:
       ATLASSIAN_EMAIL: ${{ secrets.ATLASSIAN_EMAIL }}
       ATLASSIAN_API_TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
       JIRA_AGY_DEMO: ${{ secrets.JIRA_AGY_DEMO }}
-      JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY || 'PAY' }}
+      JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY || 'KAN' }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
 
