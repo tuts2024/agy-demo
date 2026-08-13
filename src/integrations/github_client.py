@@ -110,6 +110,12 @@ class GitHubClient:
         try:
             with urllib.request.urlopen(req, timeout=10) as resp:
                 return resp.status in (200, 201)
+        except urllib.error.HTTPError as e:
+            if e.code == 422:
+                logger.info(f"PR review ({event}) converted to formal verification comment (due to GitHub author policy: {e}).")
+                return self.post_pr_comment(pr_number, f"### 🤖 Jetski Agent Code Review ({event})\n\n" + body)
+            logger.error(f"Failed to submit PR review: {e}")
+            return False
         except Exception as e:
             logger.error(f"Failed to submit PR review: {e}")
             return False

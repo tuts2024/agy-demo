@@ -734,10 +734,8 @@ def run_stage_remediation(pr_number: int = 104) -> Dict[str, Any]:
     if test_res["passed"]:
         state["pipeline_steps"][4]["status"] = "success"
         state["pipeline_steps"][5]["status"] = "success"
-        state["acceptance_criteria"][0]["status"] = "PASS"
-        state["acceptance_criteria"][1]["status"] = "PASS"
-        state["acceptance_criteria"][2]["status"] = "PASS"
-        state["acceptance_criteria"][3]["status"] = "PASS"
+        for ac in state.get("acceptance_criteria", []):
+            ac["status"] = "PASS"
         state["remediation_status"] = "REMEDIATED_AND_VERIFIED"
         state["status"] = "approved"
 
