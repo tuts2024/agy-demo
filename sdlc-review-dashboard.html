@@ -1117,33 +1117,104 @@
     }
 
     // Load Architect Markdown Report
+    // Rich Markdown-to-HTML Parser with Table & Badge Support
+    function parseMarkdownToHtml(markdown) {
+      if (!markdown) return '';
+      
+      // 1. Extract and preserve Code Blocks
+      const codeBlocks = [];
+      let text = markdown.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)\n```/g, (match, lang, code) => {
+        const id = `___CODE_BLOCK_${codeBlocks.length}___`;
+        let color = '#f8fafc';
+        if (lang === 'text') color = '#fca5a5';
+        if (lang === 'python') color = '#a7f3d0';
+        codeBlocks.push(`<pre style="background:#090c10; padding:1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin:0.75rem 0; font-family:'Fira Code', monospace; font-size:0.8rem; color:${color}; overflow-x:auto;"><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`);
+        return id;
+      });
+
+      // 2. Parse Markdown Tables into Beautiful Responsive Tables
+      text = text.replace(/((?:\|[^\n]+\|\r?\n)+)/g, (match) => {
+        const lines = match.trim().split(/\r?\n/).filter(l => l.trim().startsWith('|'));
+        if (lines.length < 2) return match;
+        
+        const headerCols = lines[0].split('|').slice(1, -1).map(c => c.trim());
+        let bodyLines = lines.slice(1);
+        if (bodyLines.length > 0 && bodyLines[0].includes('---')) {
+          bodyLines = bodyLines.slice(1);
+        }
+
+        let tableHtml = '<div style="overflow-x:auto; margin:1.25rem 0; border:1px solid rgba(255,255,255,0.12); border-radius:8px; background:rgba(15,23,42,0.6);"><table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.82rem; font-family:\'Outfit\', sans-serif;">';
+        tableHtml += '<thead style="background:rgba(255,255,255,0.06); border-bottom:1px solid rgba(255,255,255,0.15);">';
+        tableHtml += '<tr>' + headerCols.map(c => `<th style="padding:0.75rem 1rem; font-weight:700; color:#e2e8f0; text-transform:uppercase; font-size:0.72rem; letter-spacing:0.05em;">${c}</th>`).join('') + '</tr>';
+        tableHtml += '</thead><tbody>';
+
+        bodyLines.forEach((line, idx) => {
+          const cols = line.split('|').slice(1, -1).map(c => c.trim());
+          const bg = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+          tableHtml += `<tr style="background:${bg}; border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s ease;">`;
+          cols.forEach((col, cIdx) => {
+            let cellContent = col;
+            // Highlight AC IDs
+            cellContent = cellContent.replace(/\*\*(AC-\d+)\*\*/g, '<span class="tag-pill fail" style="font-size:0.72rem; padding:0.2rem 0.5rem; font-family:\'Fira Code\', monospace;">$1</span>');
+            // Highlight FAIL badges
+            cellContent = cellContent.replace(/❌\s*FAIL(\s*\([^)]+\))?/g, '<span style="color:#ef4444; font-weight:700; background:rgba(239,68,68,0.12); padding:0.2rem 0.5rem; border-radius:4px; border:1px solid rgba(239,68,68,0.3); font-size:0.75rem;">❌ FAIL$1</span>');
+            // Highlight PASS badges
+            cellContent = cellContent.replace(/✅\s*PASS/g, '<span style="color:#10b981; font-weight:700; background:rgba(16,185,129,0.12); padding:0.2rem 0.5rem; border-radius:4px; border:1px solid rgba(16,185,129,0.3); font-size:0.75rem;">✅ PASS</span>');
+            // Highlight CRITICAL / HIGH / MEDIUM
+            cellContent = cellContent.replace(/🔴\s*CRITICAL/g, '<span style="color:#f43f5e; font-weight:700; font-size:0.72rem; background:rgba(244,63,94,0.15); padding:0.2rem 0.45rem; border-radius:4px; border:1px solid rgba(244,63,94,0.3);">🔴 CRITICAL</span>');
+            cellContent = cellContent.replace(/🔴\s*HIGH/g, '<span style="color:#fb7185; font-weight:700; font-size:0.72rem; background:rgba(251,113,133,0.15); padding:0.2rem 0.45rem; border-radius:4px; border:1px solid rgba(251,113,133,0.3);">🔴 HIGH</span>');
+            cellContent = cellContent.replace(/🟡\s*MEDIUM/g, '<span style="color:#f59e0b; font-weight:700; font-size:0.72rem; background:rgba(245,158,11,0.15); padding:0.2rem 0.45rem; border-radius:4px; border:1px solid rgba(245,158,11,0.3);">🟡 MEDIUM</span>');
+
+            const textAlign = cIdx >= 2 ? 'center' : 'left';
+            tableHtml += `<td style="padding:0.75rem 1rem; color:#cbd5e1; text-align:${textAlign}; vertical-align:middle;">${cellContent}</td>`;
+          });
+          tableHtml += '</tr>';
+        });
+
+        tableHtml += '</tbody></table></div>';
+        return tableHtml;
+      });
+
+      // 3. Format Headers
+      text = text.replace(/^# (.*$)/gim, '<h1 style="font-size:1.35rem; font-weight:800; color:#f0f6fc; margin-top:1.5rem; margin-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem;">$1</h1>');
+      text = text.replace(/^## (.*$)/gim, '<h2 style="font-size:1.15rem; font-weight:700; color:#818cf8; margin-top:1.5rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">$1</h2>');
+      text = text.replace(/^### (.*$)/gim, '<h3 style="font-size:0.95rem; font-weight:600; color:#cbd5e1; margin-top:1.2rem; margin-bottom:0.4rem;">$1</h3>');
+      text = text.replace(/^#### (.*$)/gim, '<h4 style="font-size:0.85rem; font-weight:600; color:#94a3b8; margin-top:0.75rem; margin-bottom:0.25rem;">$1</h4>');
+
+      // 4. Horizontal Dividers
+      text = text.replace(/^---$/gim, '<hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:1.5rem 0;">');
+
+      // 5. Bold & Italics
+      text = text.replace(/\*\*(.*?)\*\*/gim, '<strong style="color:#f8fafc;">$1</strong>');
+      text = text.replace(/\*(.*?)\*/gim, '<em style="color:#e2e8f0;">$1</em>');
+
+      // 6. Inline Code
+      text = text.replace(/`([^`]+)`/gim, '<code style="background:rgba(255,255,255,0.08); padding:0.15rem 0.4rem; border-radius:4px; font-family:\'Fira Code\', monospace; font-size:0.85em; color:#38bdf8;">$1</code>');
+
+      // 7. Bullet Lists & Numbered Steps
+      text = text.replace(/^\* (.*$)/gim, '<li style="margin-left:1.5rem; margin-bottom:0.35rem; color:#cbd5e1;">$1</li>');
+      text = text.replace(/^- (.*$)/gim, '<li style="margin-left:1.5rem; margin-bottom:0.35rem; color:#cbd5e1;">$1</li>');
+      text = text.replace(/^(\d+)\.\s+(.*$)/gim, '<div style="margin-top:0.75rem; margin-bottom:0.35rem; color:#cbd5e1; font-weight:500;"><span style="color:#818cf8; font-weight:700;">$1.</span> $2</div>');
+
+      // 8. Line Breaks
+      text = text.replace(/\n\n/gim, '<br><br>');
+
+      // 9. Restore Code Blocks
+      codeBlocks.forEach((block, idx) => {
+        text = text.replace(`___CODE_BLOCK_${idx}___`, block);
+      });
+
+      return text;
+    }
+
+    // Load Architect Markdown Report
     async function loadReportData() {
       try {
         const res = await fetch('/api/report');
         const data = await res.json();
         const container = document.getElementById('markdown-report-content');
         if (data && data.report && container) {
-          let text = data.report;
-          // Format headers
-          text = text.replace(/^# (.*$)/gim, '<h1 style="font-size:1.4rem; font-weight:800; color:#f0f6fc; margin-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem;">$1</h1>');
-          text = text.replace(/^## (.*$)/gim, '<h2 style="font-size:1.15rem; font-weight:700; color:#818cf8; margin-top:1.25rem; margin-bottom:0.5rem;">$1</h2>');
-          text = text.replace(/^### (.*$)/gim, '<h3 style="font-size:1.0rem; font-weight:600; color:#cbd5e1; margin-top:1rem; margin-bottom:0.4rem;">$1</h3>');
-          text = text.replace(/^#### (.*$)/gim, '<h4 style="font-size:0.9rem; font-weight:600; color:#94a3b8; margin-top:0.75rem; margin-bottom:0.25rem;">$1</h4>');
-          // Format bold and italics
-          text = text.replace(/\*\*(.*?)\*\*/gim, '<strong style="color:#f8fafc;">$1</strong>');
-          text = text.replace(/\*(.*?)\*/gim, '<em>$1</em>');
-          // Format inline code
-          text = text.replace(/`([^`]+)`/gim, '<code style="background:rgba(255,255,255,0.08); padding:0.15rem 0.4rem; border-radius:4px; font-family:\'Fira Code\', monospace; font-size:0.85em; color:#38bdf8;">$1</code>');
-          // Format code blocks
-          text = text.replace(/```text\n([\s\S]*?)\n```/gim, '<pre style="background:#090c10; padding:1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin:0.75rem 0; font-family:\'Fira Code\', monospace; font-size:0.8rem; color:#fca5a5; overflow-x:auto;"><code>$1</code></pre>');
-          text = text.replace(/```python\n([\s\S]*?)\n```/gim, '<pre style="background:#090c10; padding:1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin:0.75rem 0; font-family:\'Fira Code\', monospace; font-size:0.8rem; color:#a7f3d0; overflow-x:auto;"><code>$1</code></pre>');
-          text = text.replace(/```([\s\S]*?)```/gim, '<pre style="background:#090c10; padding:1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); margin:0.75rem 0; font-family:\'Fira Code\', monospace; font-size:0.8rem; overflow-x:auto;"><code>$1</code></pre>');
-          // Bullet points
-          text = text.replace(/^\* (.*$)/gim, '<li style="margin-left:1.25rem; margin-bottom:0.25rem; color:#cbd5e1;">$1</li>');
-          text = text.replace(/^- (.*$)/gim, '<li style="margin-left:1.25rem; margin-bottom:0.25rem; color:#cbd5e1;">$1</li>');
-          // Line breaks
-          text = text.replace(/\n\n/gim, '<br><br>');
-          container.innerHTML = text;
+          container.innerHTML = parseMarkdownToHtml(data.report);
         }
       } catch (e) {
         console.error("Error loading report:", e);
